@@ -1,0 +1,23 @@
+medical_record_number,first_name,last_name,visit_id,date,time_spent,height(cm),weight(kg),charge,supplies_used
+015685,Harry,Potter,8219,06-05-1994,20 minutes,174,57,25.72,5
+07619,Ron,Weasley,7512,01-15-1994,10 minutes,180,60,7.16,2
+014593,Hermione,Granger,5896,01-25-1994,20 minutes,164,53,8.85,1
+015685,Harry,Potter,1552,1994-02-15,5 minutes,174,58,25.72,3
+015685,Harry,Potter,1202,05-19-1994,20 minutes,174,55,25.72,3
+08954,Dobby,,1205,03-12-1994,10 minutes,106,25,17.42,0
+07619,Ron,Weasley,6895,04-05-1994,.5 hours,,60,22.07,5
+015689,Harry,Potter,6854,10-11-1994,20 minute,57,174,18.09,5
+07619,Ron,Weasley,1265,07-08-1994,15 minutes,180,61,15.24,1
+,Serverus,Snape,5454,09-12-1994,10 minutes,185,82,0,0
+015685,Ron,Weasley,2369,09-31-1994,20 minutes,180,59,18.02,3
+015685,Harry,Potter,9852,10-16-1994,20 minutes,174,55,19.84,6
+07619,Ron,Weasley,7512,01-15-1994,10 minutes,180,60,22.17,10
+021456,Neville,Longbottom,5789,,10 minutes,182,76,25.72,
+07619,Ron,Weasley,9861,07-08-1994,7 minutes,180,60,19.19,5
+051627,Albus,Dumbledore,5862,08-19-1994,15 minutes,185,73,9.75,0
+015685,harry,potter,5698,06-19-1994,10 minutes,174,58,5.23,1
+014593,Hermione,Granger,1535,10-07-1994,20 minutes,164,53,30.75,10
+7619,Weasley,Ron,5934,12-31-1994,,180,61,25.72,-1
+015685,,Potter,8597,15-05-1994,15 minutes,174,58,42.67,15
+051627,Albus,Dumbledore,3666,05-07-1994,10 minutes,1855,73,19.85,8000
+07619,Ron,Weasley,7512,01-15-1994,10 minutes,180,60,22.17,10
