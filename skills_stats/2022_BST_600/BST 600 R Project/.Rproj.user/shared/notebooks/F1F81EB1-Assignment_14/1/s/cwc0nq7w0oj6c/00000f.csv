@@ -1,0 +1,6 @@
+"0","# prediction of logistic regression model for a child who did live near teh smelter during their first two years of life"
+"0","as.numeric(predict(logistic.1, data.frame(fst2yrs=""Yes"")))"
+"1","[1]"
+"1"," -0.05715841"
+"1","
+"

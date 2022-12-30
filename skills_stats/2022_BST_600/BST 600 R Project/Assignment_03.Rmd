@@ -1,0 +1,235 @@
+---
+title: "BST 600 Assignment 3"
+subtitle: |
+    | Part 1: Continuous data - 1 group estimation
+    | Part 2: Continuous data - 1 group testing
+author: "Matt Massey"
+date: "`r Sys.Date()`"
+output: html_notebook
+---
+
+<br>
+<font size="3">
+*Due: Monday, September 12, 9:00am*
+<br>
+*Total Points = 60*
+</font>
+<br><br>
+
+
+**Directions:** Open this file in RStudio. Complete each exercise in the assignment, and be sure to run any code that you write. Click "Preview" to view the .html report as you go. When you're finished, submit the .html report on Canvas. Remember, all R code you need to complete this assignment can be found in the "BST 600 R Code" document.
+
+Exercises denoted with *(4 points, code/output and interpretation)* require both R code/output and a written explanation/interpretation of the output in your own words, using complete sentences. Exercises denoted with *(2 points, code/output)* require just R code/output, and exercises denoted with *(2 points, interpretation)* require just a written answer.
+
+
+## Part 1: Continuous data - 1 group estimation (Lecture 3.1)
+
+<br>
+**Exercise 1:** Suppose you're interested in estimating a population mean, so you take a sample and use it to calculate a 95% confidence interval for the population mean. 
+
+**1a)** Is the population mean guaranteed to be in the confidence interval? Why or why not? *(2 points, interpretation)*
+
+***No, the population mean is not 100% guaranteed to be within the confidence interval. For example, with a 95% confidence interval, we would be 95% confident that the population mean lies within that calculated CI. Using a 100% CI would include infinite values and not be useful.***
+
+
+<br>
+**1b)** Is the sample mean guaranteed to be in the confidence interval? Why or why not? *(2 points, interpretation)*
+
+***Yes, the sample mean is necessarily included in the confidence interval because it is used in the calculation.***
+
+
+<br>
+**Exercise 2:** Suppose we have a sample of a specific size, and we aren't able to sample any more subjects from the population. If we wanted to, we could use information from the sample to make a 100% confidence interval for the population mean. Why wouldn't we want to do this? Hint: What would a 100% confidence interval look like? *(2 points, interpretation)*
+
+***A 100% confidence interval is possible to do, but it would have an infinite range of values and wouldn't be useful.***
+
+
+<br>
+**Exercise 3:** Your boss asks you to estimate the mean GPA of all students at UK. You take a random sample of students at UK, calculate a confidence interval for the mean GPA, and present it to your boss. Your boss tells you that she's unhappy with how wide the confidence interval is. Name two things you could do to make it narrower. *(2 points, interpretation)*
+
+***In order to decrease the confidence interval, you could (1) decrease the confidence level or (2) increase the sample size of students. Decreasing the variability of the sample would also narrow the confidence interval, but there's no control with that using random sampling methods.***
+
+
+<br>
+**Exercise 4:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. To get started, import the lead.xlsx dataset.
+
+```{r}
+# import lead dataset
+library(readxl)
+lead <- read_excel('lead.xlsx', col_names=TRUE, na="")
+```
+
+<br>
+**4a)** Our interest is in the full-scale IQ score. Write in words what $\mu$ and $\bar{x}$ represent in the specific context of this study. *(2 points, interpretation)*
+
+***The population mean of the full-scale IQ of children in communities located near smelters (or all children in this specific community) is denoted by $\mu$. The mean of this sample of 124 children within this one community from the lead dataset is denoted by $\bar{x}$.***
+
+
+<br>
+**4b)** We want to know the population mean full-scale IQ score, but we can't calculate it directly because we haven't observed the entire population. Instead, we have to estimate it. What is the best estimate of the population mean full-scale IQ score (both what it's called and the numerical answer)? *(4 points, code/output and interpretation)*
+
+```{r}
+# calculate mean full-scale IQ of lead dataset sample
+mean(lead$iqf)
+```
+
+***The population of interest is all children in communities located near smelters and the mean full-scale IQ of the population ($\mu$) is best estimated with the sample mean ($\bar{x}$) of the 124 children included in the lead dataset from one community located near a smelter, which is 91.08065.***
+
+<br>
+**4c)** Calculate a 95% confidence interval for the population mean full-scale IQ score and interpret the confidence interval. *(4 points, code/output and interpretation)*
+
+```{r}
+# Calculate 95% CI of mean full-scale IQ of all children in all communities near smelters
+t.test(lead$iqf, conf.level=.95)
+```
+
+***We are 95% confident that the mean full-scale IQ score for all children living in communities located near smelters is between 88.52022 and 93.64107.***
+
+<br> 
+**4d)** Calculate a 90% confidence interval for the population mean full-scale IQ score and interpret the confidence interval. *(4 points, code/output and interpretation)*
+
+```{r}
+# Calculate 90% CI of mean full-scale IQ of all children in all communities near smelters
+t.test(lead$iqf, conf.level=.9)
+```
+
+***We are 90% confident that the mean full-scale IQ score for all children living in communities located near smelters is between 88.93686 and 93.22443.***
+
+
+<br>
+**4e)** Is the 90% confidence interval wider or narrower than the 95% confidence interval? Why? *(2 points, interpretation)*
+
+***The 90% CI is more narrow than the 95% CI. The lower confidence level of the 90% CI means that the critical value is smaller, which decreases the resulting range of the calculated confidence interval.*** 
+
+
+<br>
+**4f)** The average full-scale IQ score among children in the general population is 100 points. Based on these confidence intervals, do you think the mean full-scale IQ score among all children living near smelters is higher than, lower than, or equal to the mean full-scale IQ score in the general population? *(2 points, interpretation)*
+
+***As stated above, we are 95% confident that the mean full-scale IQ score for all children living in all communities near smelters is between 88.52022 and 93.64107. Any value within this confidence interval is clearly lower than the mean full-scale IQ score of all children in the general population, which is 100.***
+
+
+<br>
+**4g)** Is it at all possible that the true mean full-scale IQ score among children living near smelters is 100 points? Why or why not? *(2 points, interpretation)*
+
+***Yes, it is possible. Although we are 95% confident that the mean full-scale IQ score of all children living near smelters is between 88.52022 and 93.64107 based on this one sample, we are not 100% confident that the true mean is not actually 100, which could be due to the chosen sample or random chance.***
+
+
+
+<br>
+
+## Part 2: Continuous data - 1 group testing (Lecture 3.2)
+
+<br>
+**Exercise 5:** Researchers are interested in investigating whether the bone mineral density in smokers is different from the bone mineral density in the general population. They know that the mean bone mineral density in the general population is 0.96 g/cm$^2$. The researchers measure bone mineral density in a sample of 150 smokers and perform a one-group t-test to test the following hypotheses ($\mu$ is defined as the mean bone mineral density in all smokers).
+
+* $H_0: \mu = 0.96$  
+* $H_A: \mu \neq 0.96$
+
+The researchers obtain a p-value that leads to them rejecting the null hypothesis at the $\alpha=0.05$ significance level.
+
+**5a)** Do you have enough information to know whether the 95% confidence interval for the mean bone mineral density of smokers includes the value 0.96 g/cm$^2$? Explain. *(2 points, interpretation)*
+
+***The confidence level is the probability that the population parameter is included in the calculated confidence interval, whereas the significance level is the probability that a value is different than the null in a hypothesis test; the two are complements to each other in that confidence level = 1-$\alpha$. In this example, we are given the null hypothesis was rejected at the $\alpha=0.05$ significance level, so we know that the p value is less than 0.05, and the confidence level must be at least 0.95. Therefore, the 95% CI interval of the mean bone mineral density of 150 smokers included in the sample does NOT include the value of 0.96 g/cm$^2$.***
+
+
+
+<br>
+**5b)** Do you have enough information to know whether the **90%** confidence interval for the mean bone mineral density of smokers includes the value 0.96 g/cm$^2$? Explain. *(2 points, interpretation)*
+
+***Yes, we do have enough information. We know that the 95% CI does NOT include the value of 0.96 g/cm$^2$, so the more narrow 90% CI CANNOT include that value either.***
+
+
+
+<br>
+**5c)** Do you have enough information to know whether the **99%** confidence interval for the mean bone mineral density of smokers includes the value 0.96 g/cm$^2$? Explain. *(2 points, interpretation)*
+
+***No, we do not have enough information to know if the 99% CI includes the value of 0.96 g/cm$^2$. The 99% CI is wider than the 95% CI and includes a wider range of values, which could possibly include the null hypothesis value of 0.96 g/cm$^2$.***
+
+
+<br>
+**Exercise 6:** It is known that the average length of time that American mothers breastfeed their children is 17 weeks. Researchers are interested in testing whether the average duration of breastfeeding is different in Canada. To answer this question, the researchers asked a sample of 200 Canadian mothers to report the length of time they breastfed their child. Using the information in this sample, the researchers computed the following confidence intervals for the mean breastfeeding duration (in weeks) among Canadian mothers:
+
+* 90% CI: (20.1, 40.3)
+* 95% CI: (18.3, 42.1)
+* 99% CI: (16.5, 43.9)
+
+Based on these confidence intervals, give the smallest range of values that you know the p-value would be in for the corresponding hypothesis test (testing $H_0$: $\mu = 17$ vs. $H_A: \mu \neq 17$). *(2 points, interpretation)*
+
+***Based on the given confidence intervals, we know that the p value of this hypothesis test must be less than p = .05 but greater than p = .01.***
+
+
+<br>
+**Exercise 7:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. If you have not done so already, import the lead.xlsx dataset.
+
+The questions in this section are a continuation of the exercises in Part 1 which covered confidence intervals for full-scale IQ score. IQ scores are scaled to have a mean of 100 points for any age in the general population. Researchers are interested in testing whether the mean full-scale IQ score in the population of children living near smelters is different than the mean full-scale IQ score in the general population.
+
+**7a)** Define $\mu$ and write the null and alternative hypotheses for this test. *(2 points, interpretation)*
+
+***The population for this hypothesis test ($\mu$) is the mean full-scale IQ score of all children living near smelters, and we are testing if this is different than the mean full-scale IQ scores of all children from the general population. The null hypothesis is $H_0: \mu = 100$, and the alternative hypothesis is $H_A: \mu \neq 100$.***
+
+
+<br>
+**7b)** Is the test one-sided or two-sided? Why? *(2 points, interpretation)*
+
+***This is a two-sided hypothesis test because we are testing if the mean full-scale IQ score of all children living near smelters is DIFFERENT (either higher or lower) than the general population of children.***
+
+
+<br>
+**7c)** Calculate the p-value for the one-group t-test. Using a significance level of $\alpha=0.05$, do you reject or fail to reject $H_0$? *(4 points, code/output and interpretation)*
+
+```{r}
+# t test at alpha = 0.05
+t.test(lead$iqf, alternative="two.sided", mu=100, conf.level=.95)
+```
+***Based on the two-sided hypothesis test above, we get a p-value of 2.486e-10, which is below the significance level of 0.05. Therefore, we reject the null hypothesis that the mean full-scale IQ scores of children living near smelters is the same as that of all children in the general population.***
+
+
+<br>
+**7d)** Make a conclusion about the hypothesis test in the context of the problem. *(2 points, interpretation)*
+
+***As stated above, we reject the null hypothesis that all children living near samples have a mean full-scale IQ score equal to that of all children from the general population. In other words, we have sufficient evidence that the mean full-scale IQ scores among all children living near smelters is less than 100 points.***
+
+
+
+<br>
+**Exercise 8:** One variable measured on children in the lead exposure dataset is the Hollingshead Index of Social Status (*hh_index*) which is a continuous measurement ranging from 22 to 99 where higher scores indicate higher socio-economic status. Due to the nature of the community that this sample is from, researchers are concerned that families in this community may tend to be of a lower socio-economic status than families living near smelters in other areas. This would be a concern because they want the results from this sample to be generalizable to the entire population of children living near smelters in the United States. Researchers wish to test whether the mean Hollingshead Index of Social Status in this community is lower than 68.
+
+
+**8a)** Define $\mu$ and write the null and alternative hypotheses for this test. *(2 points, interpretation)*
+
+***The population for this hypothesis test ($\mu$) is the mean Hollingshead Index of Social Status (HH Index) of all children living in this community near the smelter, and we are testing if this score is less than the mean HH Index score of children from all communities located near smelters. The null hypothesis is $H_0: \mu = 68$, and the alternative hypothesis is $H_A: \mu < 68$.***
+
+
+<br>
+**8b)** Is the test one-sided or two-sided? Why? *(2 points, interpretation)*
+
+***This is a one-sided hypothesis test because we are testing if the HH Index score of children in this community is LOWER than the mean score of children from all communities located near smelters.***
+
+
+<br>
+**8c)** What is our best estimate of $\mu$? Be specific about what your numerical answer represents. *(4 points, code/output and interpretation)*
+
+```{r}
+# estimate population HH Index using sample mean
+mean(lead$hh_index)
+```
+
+***The best estimate of the mean HH Index score of children living in this community near the smelter is given by the sample mean, which is 66.58065.***
+
+<br>
+**8d)** Perform the one-group t-test using a significance level of $\alpha=0.05$. Be sure to report the p-value, the test decision, and make a conclusion in the context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+# hypothesis test at alpha=0.05
+t.test(lead$hh_index, alternative="less", mu=68, conf.level=.95)
+```
+
+***Based on the one-sided hypothesis test above, we get a p value of 0.1383, which is greater than the significance level of 0.05. Therefore, we fail to reject the null hypothesis that the mean HH Index for children living in this community is less than that of children in all communities located near smelters. In other words, we do not have sufficient evidence that suggests that the HH Index of children in this community is less than that for children in all other communities located near smelters.***
+
+
+<br>
+**8e)** Write in words the probability that the p-value represents in the context of this problem. *(2 points, interpretation)*
+
+***The p value represents the probability that a statistic calculated from a new sample (same population and equal size) is equal to, or more extreme, than the calculated statistic from the current sample, given that the null hypothesis is true. In this example, the p value of 0.1383 tells us that the probability of obtaining another sample of 124 children from the population of children living near smelters with a sample mean of 66.58065 or less is 13.8% if the population mean is actually 68.***
+
+<br>

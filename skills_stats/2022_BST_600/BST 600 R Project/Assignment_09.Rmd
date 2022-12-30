@@ -1,0 +1,362 @@
+---
+title: "BST 600 Assignment 9"
+subtitle: |
+    | Part 1: Continuous data - multiple regression (indicator variables)
+    | Part 2: Continuous data - multiple regression (interactions)
+author: "Matt Massey"
+date: "`r Sys.Date()`"
+output: html_notebook
+---
+
+<br>
+<font size="3">
+*Due: Wednesday, October 26, 9:00am*
+<br>
+*Total Points = 88*
+</font>
+<br><br>
+
+
+**Directions:** Open this file in RStudio. Complete each exercise in the assignment, and be sure to run any code that you write. Click "Preview" to view the .html report as you go. When you're finished, submit the .html report on Canvas. Remember, all R code you need to complete this assignment can be found in the "BST 600 R Code" document.
+
+Exercises denoted with *(4 points, code/output and interpretation)* require both R code/output and a written explanation/interpretation of the output in your own words, using complete sentences. Exercises denoted with *(2 points, code/output)* require just R code/output, and exercises denoted with *(2 points, interpretation)* require just a written answer.
+
+
+<br>
+
+## Part 1: Continuous data - multiple regression (indicator variables) (Lecture 9.1)
+
+<br>
+**Exercise 1:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. To get started, import the lead.xlsx dataset.
+
+```{r}
+library(readxl)
+lead<-read_excel('lead.xlsx', col_names=TRUE, na="")
+```
+
+Researchers are interested in exploring the relationship between lead exposure and verbal IQ score among children in this community.
+
+**1a)** Fit a linear regression model with verbal IQ score (*iqv*) as the outcome and the 3-category lead exposure group variable (*lead_grp*, Not Exposed vs. Previously Exposed vs. Currently Exposed) as the predictor. Write down the regression equation using proper notation, making sure to define any variables as necessary. *(4 points, code/output and interpretation)*
+
+```{r}
+lr9.1 <- lm(iqv~lead_grp, data=lead)
+summary(lr9.1)
+```
+
+***Let $y$ be verbal IQ score, $x_1$ be binary indicator for the "Not exposed" lead exposure group (Currently exposed=0, Not exposed=1), and $x_2$ be the binary indicator for the "Previously exposed" lead exposure group (Currently Exposed=0, Previously Exposed=1).***
+
+$\hat{y}=\beta_0 + \beta_1x_1 + \beta_2x_2$
+
+$\hat{y}=84.3333 + 0.8077x_1 - 1.0152x_2$
+
+
+
+<br>
+**1b)** Calculate the predicted verbal IQ score for a child who is currently exposed to lead, for a child who has been previously exposed to lead, and for a child who is not exposed to lead.  In addition to the R code, show (write) how these values would be calculated using the regression equation. *(4 points, code/output and interpretation)*
+
+```{r}
+# child currently exposed - x1=0, x2=0
+as.numeric(predict(lr9.1, data.frame(lead_grp="Currently exposed")))
+```
+
+***For a child who is currently exposed to lead, the predicted verbal IQ score is 84.3333 points according to the R code above.***
+
+***We can also manually calculate the predicted value using the regression equation above, where $x_1=0$ and $x_2=0$:***
+
+$\hat{y}=\beta_0 + \beta_1x_1 + \beta_2x_2$
+
+$\hat{y}=84.3333 + 0.8077x_1 - 1.0152x_2$
+
+$\hat{y}=84.3333 + 0.8077(0) - 1.0152(0)$
+
+$\hat{y}=84.3333$
+
+
+```{r}
+# child previously exposed - x1=0, x2=1
+as.numeric(predict(lr9.1, data.frame(lead_grp="Previously exposed")))
+```
+***For a child who was previously exposed to lead, the predicted verbal IQ score is 83.31818 points according to the R code above.***
+
+***We can also manually calculate the predicted value using the regression equation above, where $x_1=0$ and $x_2=1$:***
+
+$\hat{y}=\beta_0 + \beta_1x_1 + \beta_2x_2$
+
+$\hat{y}=84.3333 + 0.8077x_1 - 1.0152x_2$
+
+$\hat{y}=84.3333 + 0.8077(0) - 1.0152(1)$
+
+$\hat{y}=83.3181$
+
+
+```{r}
+# child not exposed - x1=1, x2=0
+as.numeric(predict(lr9.1, data.frame(lead_grp="Not exposed")))
+```
+***For a child who has not been exposed to lead, the predicted verbal IQ score is 85.14103 points according to the R code above.***
+
+***We can also manually calculate the predicted value using the regression equation above, where $x_1=1$ and $x_2=0$:***
+
+$\hat{y}=\beta_0 + \beta_1x_1 + \beta_2x_2$
+
+$\hat{y}=84.3333 + 0.8077x_1 - 1.0152x_2$
+
+$\hat{y}=84.3333 + 0.8077(1) - 1.0152(0)$
+
+$\hat{y}=85.141$
+
+
+
+
+<br>
+**1c)** Interpret each coefficient estimate (intercept and 2 slopes) from the model in part (a) in context of the problem. *(6 points [2 for each], interpretation)*
+
+***$\beta_0=84.3333$: The expected value of verbal IQ scores for children currently exposed to lead is 84.3333 points.***
+
+***$\beta_1=0.8077$: Verbal IQ scores for children not exposed to lead is expected to increase by 0.8077 points compared to children currently exposed to lead.***
+
+***$\beta_2=-1.0152$: Verbal IQ scores for children previously exposed to lead is expected to decrease by 1.0152 points compared to children currently exposed to lead.***
+
+
+
+<br>
+**1d)** Change the reference category of *lead_grp* to be the "Not exposed" category. Fit a new linear regression model for the association between verbal IQ score and lead exposure, this time using the *lead_grp* variable with the reference category set to "Not exposed". Write down the regression equation using proper notation, making sure to define any variables as necessary. *(4 points, code/output and interpretation)*
+
+```{r}
+lead$lead_grp.new <- factor(lead$lead_grp, levels=c("Not exposed", "Currently exposed", "Previously exposed"))
+lr9.1.new <- lm(iqv~lead_grp.new, data=lead)
+summary(lr9.1.new)
+```
+***Let $y$ be verbal IQ score, $x_1$ be binary indicator for the "Currently exposed" lead exposure group (Not exposed=0, Currently exposed=1), and $x_2$ be the binary indicator for the "Previously Exposed" lead exposure group (Not exposed=0, Previously exposed=1).***
+
+$\hat{y}=\beta_0 + \beta_1x_1 + \beta_2x_2$
+
+$\hat{y}=85.1410 - 0.8077x_1 - 1.8228x_2$
+
+
+<br>
+**1e)** Interpret each coefficient estimate (intercept and 2 slopes) from the model in part (d) in context of the problem. *(6 points [2 for each], interpretation)*
+
+***$\beta_0=85.1410$: The expected value of verbal IQ scores for children not exposed to lead is 85.1410 points.***
+
+***$\beta_1=-0.8077$: Verbal IQ scores for children currently exposed to lead is expected to decrease by 0.8077 points compared to children not exposed to lead.***
+
+***$\beta_2=-1.8228$: Verbal IQ scores for children previously exposed to lead is expected to decrease by 1.8228 points compared to children not exposed to lead.***
+
+
+<br>
+**1f)** Compute two new indicator variables called *previouslyexposed* and *currentlyexposed*. The *previouslyexposed* variable should equal 1 if the child was previously exposed to lead and 0 if they were not. The *currentlyexposed* variable should equal 1 if the child is currently exposed to lead and 0 if they are not. Fit a linear regression model with verbal IQ score as the outcome and these two indicator variables as predictors. How does this model compare to the model in part (d)? *(4 points, code/output and interpretation)*
+
+```{r}
+lead$previouslyexposed <- as.factor((lead$lead_grp == "Previously exposed")*1)
+lead$currentlyexposed <- as.factor((lead$lead_grp == "Currently exposed")*1)
+
+lr9.1f.new <- lm(iqv~previouslyexposed+currentlyexposed, data=lead)
+summary(lr9.1f.new)
+```
+***This new model using two new categorical predictor variables of *previouslyexposed* and *currentlyexposed* is the same as the previous model in 1d. Model 1d used "Not exposed" as the reference category, and Currently exposed and Previously exposed as indicators equal to 1. The same is true for this new model in 1f. The new variable previouslyexposed set "Previously exposed" children equal to 1, and the others as 0; and the new variable currentlyexposed set "Currently exposed" children equal to 1, and the others as 0; leaving "Not exposed" as the reference category. The y-intercept, $\beta_1$, and $\beta_2$ are the same for both models.***
+
+
+<br>
+**Exercise 2:** Researchers are interested in exploring the relationship between lead exposure and full-scale IQ score among children in this community after adjusting for baseline demographic variables.
+
+**2a)** Fit a linear regression model with full-scale IQ score (*iqf*) as the outcome and binary lead exposure group (*Group*, Control vs. Exposed) as the main predictor of interest. Also include *sex* and *hh_index* as variables for adjustment. Write down the regression equation using proper notation, making sure to define any variables as necessary. *(4 points, code/output and interpretation)*
+
+```{r}
+lr9.2 <- lm(iqf~Group+sex+hh_index, data=lead)
+summary(lr9.2)
+```
+
+***Let $y$ be the full-scale IQ score, $x_1$ be the binary lead exposure Group (Control=0, Exposed=1), $x_2$ be sex (Female=0, Male=1), and $x_3$ be HH-index (continuous variable).***
+
+$\hat{y}=\beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3$
+
+$\hat{y}=107.95760 - 4.79909x_1 + 0.83261x_2 - 0.23441x_3$
+
+<br>
+**2b)** Interpret each coefficient estimate (intercept and 3 slopes) from the model in part (a) in context of the problem. *(8 points [2 for each], interpretation)*
+
+***$\beta_0=107.95760$: The expected value of full-scale IQ scores for female children not exposed to lead and an HH-index score of 0 is 107.95760 points.***
+
+***$\beta_1=-4.79909$: The full-scale IQ score for female children is expected to decrease by 4.79909 points when exposed to lead, when adjusting for a constant HH-index.***
+
+***$\beta_2=0.83261$: The full-scale IQ score for children not exposed to lead is expected to increase by 0.83261 points if they are male, when adjusting for a constant HH-index.***
+
+***$\beta_3=-0.23441$: The full-scale IQ score is expected to decrease by 0.23441 points for every 1 point increase in the HH-index, while holding lead exposure group and sex constant.***
+
+
+
+<br>
+**2c)** What is the predicted full-scale IQ score for a male child in the "Control" lead exposure group who has an HH-Index of 70?  In addition to the R code, show (write) how this value would be calculated using the regression equation. *(4 points, code/output and interpretation)*
+
+```{r}
+as.numeric(predict(lr9.2, data.frame(Group="Control", sex="Male", hh_index=70)))
+```
+***For a male child who has not been exposed to lead and has an HH-index of 70, the predicted full-scale IQ score is 92.38173 points according to the R code above.***
+
+***We can also manually calculate the predicted value using the regression equation above, where $x_1=0$, $x_2=1$, and $x_3=70$:***
+
+$\hat{y}=\beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3$
+
+$\hat{y}=107.95760 - 4.79909x_1 + 0.83261x_2 - 0.23441x_3$
+
+$\hat{y}=107.95760 - 4.79909(0) + 0.83261(1) - 0.23441(70)$
+
+$\hat{y}=92.3815$
+
+
+<br>
+**2d)** Is there a significant association between lead exposure group and full-scale IQ score after adjusting for sex and HH-Index? Report the p-value and make a conclusion in context of the problem. *(2 points, interpretation)*
+
+***The p-value for the association between lead exposure group and full-scale IQ score is 0.06756, when adjusting for sex and HH-index. Since the p-value is greater than 0.05 (assumed significance level), we fail to reject the null hypothesis and conclude that there is not sufficient evidence to suggest that there is a significant association between lead exposure group and full-scale IQ score after adjusting for sex and HH-index.***
+
+
+<br>
+
+## Part 2: Continuous data - multiple regression (interactions) (Lecture 9.2)
+
+<br>
+**Exercise 3:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. If you have not done so already, import the lead.xlsx dataset.
+
+**3a)** Fit a linear regression model examining the effects of sex, lead exposure group (*Group*, Control vs. Exposed), and their interaction on performance IQ score (*iqp*). Write down the regression equation using proper notation, being sure to define any variables if necessary. *(4 points, code/output and interpretation)*
+
+```{r}
+# linear regression model
+mlr9.3 <- lm(iqp ~ sex + Group + Group*sex, data=lead)
+summary(mlr9.3)
+```
+
+***Let $y$ equal performance IQ score, $x_1$ equal sex (0 for Female, 1 for Male), and $x_2$ equal lead exposure group (0 for Control, 1 for exposed).***
+
+$\hat{y}=101.2813+2.4144x_1-7.7813x_2-0.2144x_1x_2$
+
+
+
+<br>
+**3b)** Using the model in part (a), what is the predicted performance IQ score for a male child who is exposed to lead? In addition to the R code, show (write) how this value would be calculated using the regression equation. *(4 points, code/output and interpretation)*
+
+```{r}
+as.numeric(predict(mlr9.3, data.frame(sex="Male", Group="Exposed")))
+```
+
+***For a male child who is exposed to lead, the predicted performance IQ score would be 95.7 points using the R code above.***
+
+***We can predict the value for the same variables (performance IQ for a Male who is exposed to lead) using the regression model equation found in 3a, by substituting numeric values for sex (Male=1) and Group (Exposed=1), and finding the same value:***
+
+$\hat{y}=101.2813+2.4144x_1-7.7813x_2-0.2144x_1x_2$
+
+$\hat{y}=101.2813+2.4144(1)-7.7813(1)-0.2144(1)(1)$
+
+$\hat{y}=95.7$
+
+
+
+
+<br>
+**3c)** Using the model in part (a), what is the predicted performance IQ score for a female child who is exposed to lead?  In addition to the R code, show (write) how this value would be calculated using the regression equation. *(4 points, code/output and interpretation)*
+
+```{r}
+as.numeric(predict(mlr9.3, data.frame(sex="Female", Group="Exposed")))
+```
+***For a female child who is exposed to lead, the predicted performance IQ score would be 93.5 points using the R code above.***
+
+***We can predict the value for the same variables (performance IQ for a female who is exposed to lead) using the regression model equation found in 3a, by substituting numeric values for sex (Female=0) and Group (Exposed=1), and finding the same value:***
+
+$\hat{y}=101.2813+2.4144x_1-7.7813x_2-0.2144x_1x_2$
+
+$\hat{y}=101.2813+2.4144(0)-7.7813(1)-0.2144(0)(1)$
+
+$\hat{y}=93.5$
+
+
+<br>
+**3d)** *Interpret the estimated coefficients (intercept and 3 slopes) in the model in part (a). *(8 points [2 for each], interpretation)*
+
+***$\beta_0=101.2813$: On average, female children unexposed to lead have a performance IQ score of 101.2813.***
+
+***$\beta_1=2.4144$: On average, a male child unexposed to lead has a performance IQ score that is 2.4144 points higher than a female child unexposed to lead.***
+
+***$\beta_2=-7.7813$: On average, a female child exposed to lead has a performance IQ score that is 7.7813 points lower than a female unexposed to lead.***
+
+***$\beta_3=-0.2144$: The expected increase in performance IQ scores that is associated with sex is 0.2144 points lower in children exposed to lead versus those unexposed to lead, where 2.4144 was the expected difference between male unexposed and female unexposed, and 2.20 is the expected difference between male exposed and female exposed.***
+
+***...OR...***
+
+***$\beta_3=-0.2144$: The expected difference in performance IQ score that is associated with lead exposure is an additional 0.2144 points lower in male children than in female children, where the expected female exposed to lead is predicted to be 7.78 lower than a female unexposed to lead, and the expected male exposed to lead is predicted to be 7.99 lower than males unexposed to lead.***
+
+
+
+<br>
+**3e)** Is there evidence of a significant interaction effect between sex and lead exposure group on performance IQ score? Identify the p-value and make a conclusion in context of the problem. *(2 points, interpretation)*
+
+***Since the p-value is 0.972 (well above any normal signficance level), we fail to reject the null hypothesis and conclude that there is not sufficient evidence to suggest that there is an interaction between sex and lead exposure on response.***
+
+
+<br>
+**Exercise 4:** Researchers are interested in examining whether lead exposure group modifies the association between age and dominant hand finger-wrist tapping rate.
+
+**4a)** Since the interaction between age and lead exposure group will be added to the model, the researchers know that it's best to center the age variable first. Create a centered age variable. Calculate the mean and standard deviation of the untransformed *age* variable as well as the centered age variable. How do they compare? *(4 points, code/output and interpretation)*
+
+```{r}
+# create centered age variable
+lead$age.centered <- lead$age - mean(lead$age)
+# mean of untransformed age data
+cat("Mean of untransformed data: ", mean(lead$age, na.omit=TRUE), "\n")
+# mean of centered age data
+cat("Mean of centered data: ", mean(lead$age.centered, na.omit=TRUE), "\n")
+# standard deviation untransformed age data
+cat("Standard deviation of untransformed data: ", sd(lead$age), "\n")
+# standard deviation centered age data
+cat("Standard deviation of centered data: ", sd(lead$age.centered))
+```
+***The mean of the untransformed age data is 8.935 years, compared to the mean of the age data that is centered at 0 years of age (-4.871215e-16 years due to rounding errors in R).***
+
+***The standard deviation of the untransformed age data is 3.53 years of age, which is the same as that of the centered age data.***
+
+***Both datasets are the same, except the centered data has been normalized with a mean of 0 years of age. Despite centering the data, both age datasets still contain the same variation in the individual ages, which is why the standard deviations are the same for both datasets.***
+
+
+<br>
+**4b)** Fit a linear regression model examining the effects of age (centered), lead exposure group (*Group*, Control vs. Exposed), and their interaction on dominant hand finger-wrist tapping rate (*maxfwt*). Write down the regression equation using proper notation, being sure to define any variables if necessary. *(4 points, code/output and interpretation)*
+
+```{r}
+mlr9.4 <- lm(maxfwt ~ age.centered + Group + age.centered*Group, data=lead)
+summary(mlr9.4)
+```
+***Let $y$ be the dominant hand finger-wrist tapping rate, $x_1$ be age (centered), and $x_2$ be lead exposure group (control is 0, exposed is 1).***
+
+$\hat{y}=50.5825+2.7053x_1-4.7236x_2-0.1434x_1x_2$
+
+
+<br>
+**4c)** Interpret the estimated coefficients (intercept and 3 slopes) in the model in part (b). *(8 points [2 for each], interpretation)*
+
+***$\beta_0=50.5825$: On average, the dominant hand finger-wrist tapping rate is 50.58 taps for a child who is 8.935 years old and unexposed to lead.***
+
+***$\beta_1=2.7053$: Main effect for age (centered). On average, a one year increase in age is associated with a 2.7053 increase in dominant hand finger-wrist tapping rate for children unexposed to lead.***
+
+***$\beta_2=-4.7236$: Main effect for lead exposure. On average, children exposed to lead have a dominant hand finger-wrist tapping rate that is 4.72 taps lower than children who are unexposed to lead, when both children are 8.935 years old.***
+
+***$\beta_3=-0.1434$: Interaction effect between age (centered) and lead exposure. Among children exposed to lead, the expected increase in dominant hand finger-wrist tapping rate per year of age is 0.14 taps/year lower than that in children unexposed to lead.***
+
+
+
+<br>
+**4d)** What is the predicted dominant hand finger-wrist tapping rate for a 6-year old child in the “Control” lead exposure group? In addition to the R code, show (write) how this value would be calculated using the regression equation. *(4 points, code/output and interpretation)*
+
+```{r}
+as.numeric(predict(mlr9.4, data.frame(age.centered=(6-8.935), Group="Control")))
+```
+
+***For a 6-year old child who is not exposed to lead, the predicted dominant hand finger-wrist tapping rate would be 42.64251 taps using the R code above.***
+
+***We can predict the value for the same variables (dominant hand finger-wrist tapping rate for a 6-year old child not exposed to lead) using the regression model equation found in 4b, by using the centered age of a 6-year old child (6-mean=6-8.935=-2.935) and Group (Control=0), and finding the same value of 42.642 taps.***
+
+$\hat{y}=50.5825+2.7053x_1-4.7236x_2-0.1434x_1x_2$
+
+$\hat{y}=50.5825+2.7053(6-8.935)-4.7236(0)-0.1434(6-8.935)(0)$
+
+$\hat{y}=42.642$
+
+
+<br>

@@ -1,0 +1,265 @@
+---
+title: "BST 600 Assignment 7"
+author: "Matt Massey"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+subtitle: "| Part 1: Continuous data - correlation\n| Part 2: Continuous data - simple
+  linear regression\n"
+---
+
+<br>
+<font size="3">
+*Due: Monday, October 10, 9:00am*
+<br>
+*Total Points = 70*
+</font>
+<br><br>
+
+
+**Directions:** Open this file in RStudio. Complete each exercise in the assignment, and be sure to run any code that you write. Click "Preview" to view the .html report as you go. When you're finished, submit the .html report on Canvas. Remember, all R code you need to complete this assignment can be found in the "BST 600 R Code" document.
+
+Exercises denoted with *(4 points, code/output and interpretation)* require both R code/output and a written explanation/interpretation of the output in your own words, using complete sentences. Exercises denoted with *(2 points, code/output)* require just R code/output, and exercises denoted with *(2 points, interpretation)* require just a written answer.
+
+
+
+<br>
+
+## Part 1: Continuous data - correlation (Lecture 7.1)
+
+<br>
+**Exercise 1:** There is a negative correlation between alcohol consumption and age at death (those who consume more alcohol tend to die at a younger age). Identify one possible confounding variable, and explain how it may impact both alcohol consumption and age at death. *(2 points, interpretation)*
+
+***One possible confounding variable for this correlation between alcohol consumption and age at death is mental health, specifically depression. Individuals with depression are more likely to cope through both alcohol abuse and suicide.***
+
+
+
+<br>
+**Exercise 2:** In a study of elderly adults in a retirement community, researchers find a strong positive correlation between weekly time spent visiting with family and overall happiness. Identify two (statistical) reasons why this does not necessarily mean that spending time with family increases happiness in adolescents. *(2 points, interpretation)*
+
+***First, the study is based on a sample of elderly adults and the correlation cannot be extrapolated to adolescents who are outside of the observations. Second, the positive correlation does not necessarily mean that time spent with family singularly causes happiness. It could be completely spurious within that sample of the elderly or there could be a confounding variable, such as health, where healthier elderly individuals would be physically able to spend more time with family and be more happy because of good health, as opposed to those that are sick.***
+
+
+`
+<br> 
+**Exercise 3:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. To get started, import the lead.xlsx dataset.
+
+```{r}
+library(readxl)
+lead <- read_excel('lead.xlsx', col_names=TRUE, na="")
+```
+
+Researchers are interested in testing whether performance IQ scores decrease as the total number of years living near the smelter increases among children in this community. 
+
+**3a)** Make a scatterplot showing total number of years living near the smelter on the $x$ axis and performance IQ score on the $y$ axis. Does there appear to be any association between these two variables? If so, describe the association. *(4 points, code/output and interpretation)*
+
+```{r}
+plot(iqp~totyrs, data=lead, xlab="Total years living near smelter", ylab="Performance IQ score", main="", pch=19)
+```
+***Yes, there does appear to be a weak, negative, linear association between performance IQ scores and the total years living near the smelter for children in this community.***
+
+
+<br>
+**3b)** Based on the scatterplot in part (a), is correlation an appropriate analysis? Why or why not? *(2 points, interpretation)* 
+
+***Yes, correlation is appropriate in this case because there is no indication that there is NOT a linear relationship between performance IQ scores and the total years living near the smelter for children in this community. It should be noted that there is at least one outlier (~15 years living near the smelter, IQP of ~150), which may need investigated further as it could affect the correlation.***
+
+
+<br>
+**3c)** Define $\rho$ (rho) in the context of this problem, and write the null and alternative hypotheses that reflect the researchers' question of interest. *(2 points, interpretation)*
+
+***$\rho$ is the correlation between performance IQ scores and the the total years living near the smelter of all children in this community.***
+
+***The null hypothesis is $H_0: \rho = 0$***
+
+***The alternative hypothesis is $H_A: \rho < 0$***
+
+
+<br>
+**3d)** What is our best numerical estimate of $\rho$? *(4 points, code/output and interpretation)*
+
+```{r}
+cor(lead$iqp, lead$totyrs, use="complete")
+```
+***The best estimate of $\rho$, the correlation of performance IQ scores and the total years living near the smelter of all children in this community ($\rho$), is the correlation calculated from the sample of children in this community ($r$), which is -0.1783584.***
+
+
+<br>
+**3e)** Perform the correlation test. Identify the p-value, and make a conclusion about the test in the context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+cor.test(lead$totyrs, lead$iqp, alternative="less", method="pearson", conf.level=0.95)
+```
+***Using a significance level of $\alpha=0.05$, the calculated p-value is 0.02374. Since the p-value is less than 0.05, we reject the null hypothesis and conclude that there is sufficient evidence to suggest that there is a negative association between performance IQ scores and the total years living near the smelter for children in this community.*** 
+
+
+<br>
+**3f)** Are there any other factors that could explain the relationship between total years living near the smelter and performance IQ score? Explain. *(2 points, interpretation)*
+
+***Other factors that could explain the relationship that performance IQ scores are negatively correlated with the total years living near the smelter might be the community education system and/or family relationships in the community. If the education system were poor, then the children's performance IQ scores could be negatively impacted the longer they are in the school system. Alternatively, if the community is associated with poor family life conditions, such as long working hours of parents, high divorce rates, poor home life, all of which could lead to lower performance IQ scores the longer the children are in those conditions.***
+
+
+
+<br>
+**Exercise 4:** Researchers are interested in testing whether there is an association between age and full-scale IQ score among children in this community. 
+
+**4a)** Make a scatterplot showing age on the x axis and full-scale IQ score on the y axis. Based on the scatterplot, is correlation an appropriate analysis? Why or why not? *(4 points, interpretation)* 
+
+```{r}
+plot(iqf~age, data=lead, xlab="Age (years)", ylab="Full-scale IQ (points)", main="", pch=19)
+```
+
+***The scatterplot of full-scale IQ scores versus age does show a linear relationship along a horizontal line, does NOT show a relationship other than linear, and correlation could be appropriately applied in this case. However, because the linear relationship is horizontal, there is no/little systematic change in full-scale IQ due to children's age. That is the full-scale IQ scores are approximately the same for all ages, and the correlation should be around 0.***
+
+
+<br>
+**4b)** Define $\rho$ (rho) in the context of this problem, and write the null and alternative hypotheses that reflect the researchers' question of interest. *(2 points, interpretation)*
+
+***$\rho$ is the correlation between full-scale IQ scores and the age of each child in this community.***
+
+***The null hypothesis is $H_0: \rho = 0$***
+
+***The alternative hypothesis is $H_A: \rho \neq 0$***
+
+
+<br>
+**4c)** Perform the correlation test. Identify the p-value, and make a conclusion about the test in the context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+cor.test(lead$age, lead$iqf, alternative="two.sided", method="pearson", conf.level=0.95)
+```
+***Using a significance level of $\alpha=0.05$, the calculated p-value is 0.7989. Since the p-value is greater than 0.05, we fail to reject the null hypothesis and conclude that there is not sufficient evidence to suggest that there is any relationship between full-scale IQ scores and the age of children living in the community located near a smelter.***
+
+
+<br>
+
+## Part 2: Continuous data - simple linear regression (Lecture 7.2)
+
+<br>
+**Exercise 5:** Explain in your own words how the regression line is determined from a set of $x$ values and a set of $y$ values. Hint: Your answer should say something about residuals. *(2 points, interpretation)*
+
+***A least-squares linear regression model is a line of best fit through the data points that minimizes the sum of the squares of the residuals (vertical difference between observed and estimated value of the linear model at a particular x value).***
+
+
+<br>
+**Exercise 6:** In linear regression, we are oftentimes interested in testing whether the slope of the regression line is significantly different from 0. Explain why we are usually not interested in testing whether the intercept of the regression line is significantly different from 0. *(2 points, interpretation)*
+
+***Regression analysis is limited to the extent of the dataset with no extrapolation beyond the scope of the observed values used to make our linear model. The intercept of the regression is usually outside of this range and commonly includes unrealistic or meaningless values of X (e.g., 0 years of age or 0 pounds of weight).*** 
+
+
+<br>
+**Exercise 7:**  This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. If you have not done so already, import the lead.xlsx dataset.
+
+Suppose that we want to characterize the association between age and finger-wrist tapping rate in the dominant hand among children in this community. 
+
+**7a)** Which variable is the predictor variable, and which variable is the outcome variable? *(2 points, interpretation)*
+
+***In the context of this study, age is the predictor variable and finger-wrist tapping rate in the dominant hand is the outcome variable.***
+
+
+<br>
+**7b)** Fit the linear regression model, and display the model results. Write down the equation for the regression line using proper notation. If you use placeholder variables such as *x* and/or *y*, be sure to define them. *(4 points, code/output and interpretation)*
+
+```{r}
+regression7b <- lm(maxfwt ~ age, data=lead)
+summary(regression7b)
+```
+***The linear regression model for the association between age and finger-wrist tapping rate in the dominant hand among children in this community is given by the equation:***
+
+***$\hat{y}=24.1677 + 2.7591$$x$***
+
+***Where $x$ is age (in years) and $y$ is the dominant-hand finger-wrist tapping rate.***
+
+
+<br>
+**7c)** Interpret the estimates of the intercept and the slope in context of the problem. *(2 points, interpretation)*
+
+***$\hat{\beta}_0=24.1677$***
+
+***$\hat{\beta}_1=2.7591$***
+
+***The linear regression model here predicts that on average at 0 years of age, the maximum finger-wrist tapping rate (dominant hand) is 24.1677 taps. We also expect that the finger-wrist tapping rate of the dominant hand increases by 2.7591 taps on average for every 1 year increase in age.***
+
+
+<br>
+**7d)** What is the predicted finger-wrist tapping rate for a child in this community who is 7 years old? *(4 points, code/output and interpretation)*
+
+```{r}
+as.numeric(predict(regression7b, data.frame(age=7)))
+```
+***The predicted finger-wrist tapping rate in the dominant hand for a 7 year old child in this community is 43.48136 taps.***
+
+
+<br>
+**7e)** Use the regression output in part (b) to test whether there is a significant linear association between age and finger-wrist tapping rate in the dominant hand. Be sure to write the hypotheses, identify the p-value, and make a conclusion in context of the problem. *(2 points, interpretation)*
+
+***The null hypothesis is given by: $H_0: \beta_1=0$***
+
+***The alternative hypothesis is given by: $H_A: \beta_1\neq0$***
+
+***The p-value for the linear regression model is <0.001 (3.947e-13). Since the p-value is less than 0.05, we reject the null hypothesis and conclude that there is sufficient evidence to suggest that there is a positive linear relationship between age and dominant-hand finger-wrist tapping rates of children in this community.*** 
+
+
+<br>
+**Exercise 8:** Suppose that we want to characterize the association between total number of years living near the smelter and full-scale IQ score among children in this community. 
+
+**8a)** Which variable is the predictor variable, and which variable is the outcome variable? *(2 points, interpretation)*
+
+***This research question uses the total years living near the smelter as a predictor variable and the full-scale IQ score as the outcome variable.***
+
+
+<br>
+**8b)** Make a scatterplot showing the relationship between the two variables. Does the association appear to be linear? *(4 points, code/output and interpretation)*
+
+```{r}
+plot(iqf~totyrs, data=lead, xlab="Time living near smelter (years)", ylab="Full-scale IQ Score (points)", main="", pch=19)
+```
+
+***Yes, there does appear to be a weak negative linear association between full-scale IQ scores and the number of years living near the smelter for children in this community.***
+
+<br>
+**8c)** Fit the linear regression model, and display the model results. Write down the equation for the regression line using proper notation. If you use placeholder variables such as *x* and/or *y*, be sure to define them. *(4 points, code/output and interpretation)*
+
+```{r}
+regression8c <- lm(iqf~totyrs, data=lead)
+summary(regression8c)
+```
+
+***The linear regression model for the relationship between full-scale IQ scores and the total years of children living near the smelter in this community is given by the equation:***
+
+***$\hat{y}=94.3350-0.4827$$x$***
+
+***Where $x$ is the total time living near the smelter in years, and $y$ is the full-scale IQ score.***
+
+
+<br>
+**8d)** Interpret the estimates of the intercept and the slope in context of the problem. *(2 points, interpretation)*
+
+***$\hat{\beta}_0 = 94.3350$***
+
+***$\hat{\beta}_1 = -0.4827$***
+
+***The linear regression model here predicts that on average, children who have never lived in this community near the smelter have a full-scale IQ score of 94.335 points. The model also predicts that full-scale IQ scores decrease by 0.4827 points for every year living near the smelter in this community.***
+
+
+<br>
+**8e)** What is the predicted full-scale IQ score for a child who has lived near the smelter for 5.3 years? *(4 points, code/output and interpretation)*
+
+```{r}
+as.numeric(predict(regression8c, data.frame(totyrs=5.3)))
+```
+
+***The predicted full-scale IQ score for a child who has lived near the smelter for 5.3 years is 91.77668 points.***
+
+
+<br>
+**8f)** Calculate a 95% confidence interval for the slope relating total number of years living near the smelter to full-scale IQ score. Use the interval to test whether there is a significant linear association between total number of years living near the smelter and full-scale IQ score. Be sure to make a conclusion in context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+confint(regression8c, level=0.95)
+```
+
+***We are 95% confident that the true slope of the linear regression model of full-scale IQ scores in response to the total time living near the smelter (in years) for all children in this community is between -1.223978  and 0.2585651. Since the confident interval includes 0 as a plausible value of the slope, we cannot conclude that there is sufficient evidence to suggest that there is any relationship between full-scale IQ scores as a response to the total time living near the smelter of all children in this community.***
+
+<br>

@@ -1,0 +1,2 @@
+"0","# indicator variable for high performance IQ"
+"0","lead$iqp_high <- as.factor((lead$iqp >= 100)*1)"

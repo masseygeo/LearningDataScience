@@ -1,0 +1,283 @@
+---
+title: "BST 600 Assignment 15"
+subtitle: |
+    | Part 1: Binary data - logistic regression (continued)
+    | Part 2: Nonparametrics
+author: "Matt Massey"
+date: "`r Sys.Date()`"
+output: html_notebook
+---
+
+<br>
+<font size="3">
+*Due: Monday, December 5, 9:00am*
+<br>
+*Total Points = 62*
+</font>
+<br><br>
+
+
+**Directions:** Open this file in RStudio. Complete each exercise in the assignment, and be sure to run any code that you write. Click "Preview" to view the .html report as you go. When you're finished, submit the .html report on Canvas. Remember, all R code you need to complete this assignment can be found in the "BST 600 R Code" document.
+
+Exercises denoted with *(4 points, code/output and interpretation)* require both R code/output and a written explanation/interpretation of the output in your own words, using complete sentences. Exercises denoted with *(2 points, code/output)* require just R code/output, and exercises denoted with *(2 points, interpretation)* require just a written answer.
+
+
+<br>
+
+## Part 1: Binary data - logistic regression (continued) (Lecture 15.1)
+
+<br>
+**Exercise 1:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. To get started, import the lead.xlsx dataset.
+
+```{r}
+library(readxl)
+lead<-read_excel('lead.xlsx', col_names=TRUE, na="")
+```
+
+Researchers are interested in identifying which variables are predictive of having a high or low finger-wrist tapping rate.
+
+**1a)** Create a variable called *maxfwt_high* that is equal to 1 when the dominant hand finger-wrist tapping rate (*maxfwt*) is greater than or equal to 80 taps per minute and equal to 0 when it is less than 80 taps per minute. Comment on the frequencies or relative frequencies of *maxfwt_high* in this sample. *(4 points, code/output and interpretation)*
+
+```{r}
+# indicator variable for high dominant hand figer-wrist tapping rate
+lead$maxfwt_high <- as.factor((lead$maxfwt >= 80)*1)
+
+# relative frequencies of maxfwt_high indicator variable
+prop.table(table(lead$maxfwt_high))
+```
+
+***The lead dataset sample of children in the community has 97.9% with a high dominant hand finger-wrist tapping rate ($\geq80$ taps), and 2.02% with a low dominant hand finger-wrist tapping rate ($<80$ taps).***
+
+
+<br>
+**1b)** Fit a logistic regression model with the log odds of *maxfwt_high* as the outcome. Include age, HH-Index, hyperactivity, full-scale IQ score, sex, and lead exposure group (*Group*) as predictors. Explain why we should not report or interpret the results from this model. *(4 points, code/output and interpretation)*
+
+```{r}
+# check order of outcome variable
+table(lead$maxfwt_high)
+```
+
+```{r}
+# logistic regression model 1
+logistic.1 <- glm(maxfwt_high ~ age + hh_index + hyperact + iqf + sex + Group, family=binomial, data=lead)
+summary(logistic.1)$coef
+```
+
+***The logistic regression model used here did not converge probably because of too many predictor variables in the model, and the coefficients of the model should not be used. It would be advised to drop some predictors from the model and/or increase the sample size so that the maximum likelihood estimation converges for the model.***
+
+<br>
+**1c)** Explain one way you could change the analysis strategy to obtain a model that converges. *(2 points, interpretation)* 
+
+***In this case, it would be advised to drop one or more predictor variables from the model, try fitting the logistic regression again with a successful maximum likelihood estimation convergence.***
+
+
+<br>
+**Exercise 2:** Researchers are interested in exploring how living near the smelter during the first two years of life as well as the HH-Index impact the probability of lead exposure among these children.
+
+**2a)** Fit a logistic regression model with the log odds of lead exposure (*Group*) as the outcome. Include the indicator for living near the smelter during the first two years of life and the HH-Index as predictors. Write the regression equation, being sure to define any variables you use. *(4 points, code/output and interpretation)*
+
+```{r}
+# transform outcome variable
+lead$Group <- as.factor(lead$Group)
+# check order of outcome variable
+table(lead$Group)
+```
+
+
+```{r}
+# logistic regression model 2
+logistic.2 <- glm(Group ~ fst2yrs + hh_index, family=binomial, data=lead)
+summary(logistic.2)
+```
+
+***Let $p$ be the probability of lead exposure, $x_1$ be whether children lived near the smelter during their first two years of life (0=No,1=Yes), and $x_2$ be the HH-index of the child. The equation for the logistic regression model is given by:***
+
+$\log\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1x_1 + \beta_2x_2$
+
+$\log\left(\frac{p}{1-p}\right) = -1.227741095 + 0.718674879x_1 + 0.007290229x_2$
+
+<br>
+**2b)** Calculate and interpret a 95% confidence interval for the odds ratio of lead exposure comparing those who did and did not live near the smelter during their first two years of life, adjusted for HH-Index. *(4 points, code/output and interpretation)*
+
+```{r}
+# calculate 95% CI of odds ratio
+exp(confint(logistic.2, level=0.95))
+```
+
+***We are 95% confident that the true adjusted odds ratio of lead exposure for children who lived near the smelter during their first two years of life is between 0.90444112 and 4.699953, controlling for the HH-index score.***
+
+<br>
+**2c)** Based on the confidence interval in (b), does there appear to be a significant association between living near the smelter during the first two years of life and lead exposure, after adjusting for HH-Index? Justify your answer using the confidence interval. *(2 points, interpretation)*
+
+***Since the confidence interval includes the value of 1, there does not appear to be a significant association between living near the smelter during the first two years of life and lead exposure, after adjusting for the HH-index score.***
+
+
+<br>
+**2d)** Use the output in (a) to identify the p-value that corresponds to the test of association in (c). Does the conclusion you would make with the hypothesis test correspond to the conclusion you made with the confidence interval? *(2 points, interpretation)*
+
+***The p-value for the association between living near the smelter during the first two years of life and lead exposure, after adjusting for the HH-index score is 0.08567048. Since the p-value is greater than 0.05, we fail to reject the null hypothesis and conclude that there is not a signficant association between living near the smelter during the first two years of life and lead exposure, after adjusting for the HH-index score.***
+
+
+<br>
+**Exercise 3:** Researchers know that the length of time living near the smelter impacts whether or not the child will have a high performance IQ score. They hypothesize that in addition to the total length of time, there is a critical window during the first two years of life where if a child lives near the smelter during these first two years, they are especially susceptible to the detrimental effects of lead exposure from the smelter.
+
+**3a)** Create an indicator variable called *iqp_high* that is equal to 1 when the performance IQ score (*iqp*) is greater than or equal to 100 points, and equal to 0 when the performance IQ score (*iqp*) is less than 100 points. We'll define *p* to be the probability of having a high performance IQ score. In order to fit the logistic regression model properly in the next question, we need to ensure that the categories of the *iqp_high* variable are in the correct order. Print a frequency table of *iqp_high* to assess whether the variable is set up correctly (i.e., the '1' category should be listed **second**). If it is not, reorder the categories of the *iqp_high* variable. *(2 points, code/output)*
+
+Note: This is the same question as Exercise 2a in Assignment 14 -- you can copy/paste your answer from that Assignment here if you wish. 
+
+```{r}
+# indicator variable for high performance IQ
+lead$iqp_high <- as.factor((lead$iqp >= 100)*1)
+```
+
+```{r}
+# check order of outcome variable
+table(lead$iqp_high)
+```
+
+***New indicator variable created for high performance IQ scores (1 for iqp >= 100); category is listed second in table and is correct for logistic regression.***
+
+
+<br>
+**3b)** Fit two logistic regression models, both with the log odds of having a high performance IQ score as the outcome. In Model 1, include the total number of years living near the smelter as the only predictor. In Model 2, include the total number of years living near the smelter as well as the indicator for living near the smelter during the first two years of life as predictors. Use the AIC to assess which model is better for capturing the relationship between living near the smelter and having a high performance IQ score. *(4 points, code/output and interpretation)*
+
+```{r}
+# logistic regression model one
+logistic.3.1 <- glm(iqp_high ~ totyrs, family=binomial, data=lead)
+summary(logistic.3.1)
+```
+
+```{r}
+# logistic regression model two
+logistic.3.2 <- glm(iqp_high ~ totyrs + fst2yrs, family=binomial, data=lead)
+summary(logistic.3.2)
+```
+
+***The AIC for model 1 is 171.9 and the AIC for model 2 is 173.87. Since the AIC for model 1 is smaller, model 1 is the better model for capturing the relationship between living near the smelter and having a high performance IQ score.***
+
+<br>
+
+## Part 2: Nonparametrics (Lecture 15.2)
+
+<br>
+**Exercise 4:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. If you have not done so already, import the lead.xlsx dataset.
+
+Researchers are interested in examining hyperactivity levels of children in this community (*hyperact*), as measured with the Werry-Weiss-Peters Scale for hyperactivity (5 point scale where 0=no hyperactivity and 4=severely hyperactive). They want to use the nonparametric Wilcoxon signed-rank test to assess whether the median hyperactivity level is equal to 1 in this community.
+
+**4a)** Define $m$ and write the null and alternative hypotheses that correspond to this research question. *(2 points, interpretation)*
+
+***Let $m$ be the median hyperactivity level of children in this community. The null and alternative hypotheses for the Wilcoxon signed-rank test here are:***
+
+$H_0: m = 1$ (Werry-Weiss-Peters scale)
+
+$H_A: m \neq 1$ (Werry-Weiss-Peters scale)
+
+
+
+<br>
+**4b)** Plot a histogram of the *hyperact* variable. Does it appear that the hyperactivity scale is normally distributed? *(4 points, code/output and interpretation)*
+
+```{r}
+# histogram of hyperactivity level
+hist(lead$hyperact, freq=TRUE, col="darkgray", xlab="Hyperactivity\n(Werry-Weiss-Peters scale)", main="")
+```
+
+***The distribution of hyperactivity levels as measured on the Werry-Weiss-Peters scale shows a right-skewed dataset and is definitely not normally distributed.***
+
+
+<br>
+**4c)** Perform the Wilcoxon signed-rank test that correspond to your hypotheses in (a). Identify the p-value and make a conclusion in context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+# Wilcoxon signed-rank test for hyperactivity
+wilcox.test(lead$hyperact, alternative="two.sided", mu=1)
+```
+
+***The p-value for the Wilcoxon signed-rank test for hyperactivity (Werry-Weiss-Peters scale) is 0.001285. Since the p-value is less than 0.05, we reject the null hypothesis and conclude that there is sufficient evidence that the median hyperactivity level as measured on the Werry-Weiss-Peters scale, of children in this community is different than 1.***
+
+
+<br>
+**Exercise 5:** There is particular interest in examining the finger-wrist tapping rate as it is an assessment tool used to measure motor performance, which may be impacted by lead exposure.
+
+**5a)** Researchers wish to use a nonparametric test to assess whether the median finger-wrist tapping rate is different in the left hand and right hand among children in this community. Are the two groups (left hand and right hand) paired or independent? *(2 points, interpretation)*
+
+***Asessing whether the median finger-wrist tapping rate is different in the left hand and right hand among children in this community is a paired group because the measurements come from the same child, and the significance can be determined using a Wilcoxon signed-rank test.***
+
+
+<br>
+**5b)** Write the null and alternative hypotheses for the test in (a). Be sure to define any variables you use. *(2 points, interpretation)*
+
+***Let $\Delta_m$ be the difference in the median finger-wrist tapping rate in the left hand and right hand from children in this community. The null and alternative hypotheses are:***
+
+$H_0: \Delta = 0$
+
+$H_A: \Delta \neq 0$
+
+
+<br>
+**5c)** Perform the test that corresponds to your hypotheses in (b). Identify the p-value and make a conclusion in context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+# Wilcoxon signed-rank test for paired group
+wilcox.test(lead$fwt_l, lead$fwt_r, alternative="two.sided", paired=TRUE)
+```
+
+***The p-value for the paired Wilcoxon signed-rank test is <0.0001. Since the p-value is less than 0.05 we reject the null hypothesis and conclude that there is sufficient evidence that there is a difference in median finger-wrist tapping rates between the left and right hands of children in this community.***
+
+
+<br>
+**5d)** Now the researchers wish to use a nonparametric test to assess whether the median dominant hand finger-wrist tapping rate is different among children exposed and unexposed to lead. Are the two groups (exposed and unexposed) paired or independent? *(2 points, interpretation)*
+
+***Assessing whether the median dominant hand finger-wrist tapping rate is different among children exposed and unexposed to lead requires that the two groups (exposed and unexposed) are independent.***
+
+
+<br>
+**5e)** Write the null and alternative hypotheses for the test in (d). Be sure to define any variables you use. *(2 points, interpretation)*
+
+***Let $m_1$ be the median dominant hand finger-wrist tapping rate for children not exposed to lead and $m_2$ be the median dominant hand finger-wrist tapping rate of children exposed to lead in this community. The null and alternative hypotheses are:***
+
+$H_0: m_1 = m_2$
+
+$H_A: m_1 \neq m_2$
+
+
+<br>
+**5f)** Perform the test that corresponds to your hypotheses in (e). Identify the p-value and make a conclusion in context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+# Wilcoxon rank-sum test for independent groups
+wilcox.test(maxfwt ~ Group, alternative="two.sided", data=lead)
+```
+
+***The p-value is 0.002973. Since the p-value is less than 0.05 we reject the null hypothesis and conclude that there is sufficient evidence that the median dominant hand finger-wrist tapping rate of children exposed and not exposed to lead in this community are different.***
+
+<br>
+**Exercise 6:** Interest lies in examining the relationship between full-scale IQ score and lead exposure (currently exposed, previously exposed, not exposed) as defined by the 3-category *lead_grp* variable. Researchers wish to use a nonparametric test for this analysis.
+
+**6a)** Write the null and alternative hypotheses for this test, being sure to define any variables you use. *(2 points, interpretation)*
+
+***Let $m_1$ be the median full-scale IQ score in children currently exposed to lead, $m_2$ be the median full-scale IQ score in children not exposed to lead, and $m_3$ be the median full-scale IQ score in children previously exposed to lead in this community. The null and alternative hypotheses are:***
+
+$H_0: m_1 = m_2 = m_3$
+
+$H_A$: ***at least one of the medians from the three lead exposure groups is different***
+
+
+<br>
+**6b)** Perform the test that corresponds to your hypotheses in (a). Identify the p-value and make a conclusion in context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+# Kruskall-Wallis test for >2 independent groups
+kruskal.test(iqf ~ lead_grp, data=lead)
+```
+
+***The p-value is 0.1866. Since the p-value is greater than 0.05, we fail to reject the null hypothesis and conclude that there is not sufficient evidence that the median full-scale IQ score is the same among all three lead exposure groups of children in this community.*** 
+
+
+<br>
+**6c)** If we had enough subjects and could assume that the full-scale IQ score was normally distributed in each of the three lead exposure groups, the parametric ANOVA test would also be appropriate for comparing the full-scale IQ score across lead exposure groups. If the ANOVA test and Kruskal-Wallis test are both appropriate, which one is preferable to use and why? *(2 points, interpretation)*
+
+***If both the ANOVA and Kruskal-Wallis test were both appropriate, the parametric ANOVA would be preferred because it would have a higher power.***
+
+
+<br>

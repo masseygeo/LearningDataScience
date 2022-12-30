@@ -1,0 +1,75 @@
+---
+title: "assignment5key"
+author: "Melissa Pittard"
+date: "11/15/2021"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 1
+
+```{r}
+
+setwd("C:/Users/Melissa/Dropbox (Personal)/STA 674/code for homework/Assignment 5")
+library(emmeans)
+pest = read.csv("pesticides.csv", header = T)
+KILLED = pest$Killed/100
+
+# the following specifications are required 
+PESTICIDE = as.factor(pest$Pesticide)
+PEST = data.frame(PESTICIDE, KILLED)
+out = lm(KILLED ~ PESTICIDE)
+summary(out)
+
+
+confint(out) ####confidencce without correction
+confint(out,level = (1 - 0.05/5)) ###confidence with correction
+
+library(DescTools)
+
+#ANOVA table, lsmeans, and Multiple Comparisons using Tukey
+results = aov(KILLED ~ PESTICIDE, data=PEST)
+summary(results)
+lsmeans(results, "PESTICIDE")
+TukeyHSD(results)
+```
+
+## Problem 2
+
+```{r}
+
+kuehl = read.csv("kuehl_6_6.csv", header = T)
+library(multcomp)
+
+PROPORTION  = as.factor(kuehl$PROPORTION)
+SURFACE     = as.factor(kuehl$SURFACE)
+FILLER      = as.factor(kuehl$FILLER)
+LOSS        = kuehl$LOSS
+KUEHL = data.frame(PROPORTION, SURFACE, FILLER, LOSS)
+
+#ANOVA table
+result.anova = aov(LOSS ~ PROPORTION*SURFACE*FILLER, data=KUEHL)
+summary(result.anova)
+
+###check assumptions
+
+result_lm = lm(LOSS ~ PROPORTION*SURFACE*FILLER)
+result_rg1 = ref_grid(result_lm)
+#summary(result_lm)
+plot(result_lm)
+
+boxplot(LOSS ~ PROPORTION*SURFACE*FILLER)
+
+#LSMeans and confidence intervals
+
+result_emm =emmeans(result_rg1, ~(PROPORTION*SURFACE*FILLER))
+confint(result_emm, level = (1 - 0.05/8)) 
+
+
+```
+

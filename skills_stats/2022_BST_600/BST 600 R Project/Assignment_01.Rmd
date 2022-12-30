@@ -1,0 +1,141 @@
+---
+title: "BST 600 Assignment 1"
+subtitle: "Types of data, random variables, probability"
+author: "Matt Massey"
+date: "`r Sys.Date()`"
+output: html_notebook
+---
+
+<br>
+<font size="3">
+*Due: Monday, August 29, 9:00am*
+<br>
+*Total Points = 26*
+</font>
+<br><br>
+
+
+**Directions:** Open this file in RStudio. Complete each exercise in the assignment, and be sure to run any code that you write. Click "Preview" to view the .html report as you go. When you're finished, submit the .html report on Canvas. Remember, all R code you need to complete this assignment can be found in the "BST 600 R Code" document.
+
+Exercises denoted with *(4 points, code/output and interpretation)* require both R code/output and a written explanation/interpretation of the output in your own words, using complete sentences. Exercises denoted with *(2 points, code/output)* require just R code/output, and exercises denoted with *(2 points, interpretation)* require just a written answer.
+
+
+
+## Importing Data; Types of Variables
+
+The dataset lead.xlsx contains data from a community located near a smelter (smelting is used to extract metals from their ores). The community is concerned that the smelter is causing lead contamination in their drinking water which could affect children's psychological and neurological functioning skills. The study examines lead exposure and neurological outcomes on 124 children from the community. For more information, check out the data dictionary on Canvas.
+
+<br>
+**Exercise 1:** Download the lead.xlsx dataset and the data dictionary from Canvas. Place the lead.xlsx dataset in the same folder on your computer that the BST 600 R Project (and this Assignment 1 file) is in.
+
+
+<br>
+**1a)** Import the lead.xlsx dataset. There won't be any output when you run the code, but you should see the name of the dataset appear in the upper right window in RStudio when you've successfully imported the dataset. *(2 points, code)*
+
+```{r}
+library(readxl)
+lead <- read_excel("lead.xlsx", col_names=TRUE, na="")
+```
+
+
+<br>
+**1b)** Display the names of all variables in the lead dataset. *(2 points, code/output)*
+
+```{r}
+names(lead)
+```
+
+
+<br>
+**1c)** Identify one continuous variable, one categorical (binary) variable, and one categorical (not binary) variable in the lead dataset. You may want to use the data dictionary to help make your decision. *(2 points, interpretation)*
+
+
+***Continuous: age***
+<br>
+***Categorical (binary): sex***
+<br>
+***Categorical (non-binary): hyperact***
+
+
+<br>
+
+## Probability
+
+You can use R as a calculator to perform basic mathematical computations by typing an equation in the section of R code. For example, typing 5+5 inside the block of R code and running that section will output 10 in the report.
+
+<br>
+**Exercise 2:** The lead exposure dataset contains information on 124 children. There are 46 children exposed to lead and 78 children unexposed to lead. What is the probability of being exposed to lead in this sample? Use R as a calculator to perform this computation. *(4 points, code/output and interpretation)*
+
+```{r}
+46/124
+```
+
+<br>
+***The probability of being exposed to lead in this sample is 0.3709677 or ~37%.***
+
+
+<br>
+**Exercise 3:** Among the 46 children exposed to lead, 30 are male and 16 are female. Among the 78 children unexposed to lead, 46 are male and 32 are female. What is the conditional probability of being male given that the child was exposed to lead? Is this higher or lower than the conditional probability of being male given the child was not exposed to lead? Use R as a calculator to perform these computations. *(4 points, code/output and interpretation)*
+
+```{r}
+30/46
+46/78
+```
+
+<br>
+***The conditional probability of being male given that the child was exposed to lead is 0.6521739 or ~65%.***
+
+***The conditional probability of being male given that the child was NOT exposed to lead is 0.5897436 or ~59%.***
+
+ 
+<br>
+
+## Diagnostic Testing
+
+
+A human chorionic gonadotropin (HCG) urine test is commonly used to test for pregnancy. HCG is a continuous measurement measured in units of mIU/mL (milli-international units per milliliter). Researchers have developed a new at-home pregnancy test that they believe will be better at determining pregnancy status than the standard test. They recruit a random sample of women and measure each woman’s HCG level using both the standard test and their new test. After waiting a few months, the researchers also record each woman’s true pregnancy status. They then calculate sensitivity and specificity for both tests (standard test and new test) using eight different possible cutoffs for HCG to indicate a positive test for pregnancy. Open the image called "ROC_pregnancy_test.jpg" to view the ROC curves showing these results. You do NOT need to import the JPG image in your R Notebook.
+
+
+<br>
+**Exercise 4:** The following questions refer to the HCG pregnancy test ROC curves.
+
+
+<br>
+**4a)** What does sensitivity mean in the context of this problem? For instance, “sensitivity is the probability of ______ among _______”. *(2 points, interpretation)*
+
+***In this example, sensitivity is the probability of a positive HCG test among women who are actually pregnant.***
+
+
+<br>
+**4b)** What does specificity mean in the context of this problem? For instance, “specificity is the probability of ______ among _______”. *(2 points, interpretation)*
+
+***In this example, specificity is the probability of a negative HCG test among women who are not pregnant.***
+
+
+<br>
+**4c)** Do you think it is more important to maximize sensitivity or specificity in this context? Explain. *(2 points, interpretation)*
+
+***My personal opinion is that sensitivity is more important because it's absolutely critical to determine pregnancy for the both the health of the mother and the fetus. The downside of a high specificity would be a false positive, in which case the mother may experience trauma, but I don't think this is as important.***
+
+
+
+<br>
+**4d)** For HCG cutoff #5, what is the sensitivity and specificity of the standard test (approximate from the plot)? *(2 points, interpretation)*
+
+***Sensitivity (#5): 0.75***
+<br>
+***Specificity (#5): 0.65***
+
+
+<br>
+**4e)** Suppose sensitivity and specificity are equally important in this context. Which HCG cutoff (#1, #2, …) would you use to indicate a positive test result for the new test? Why? *(2 points, interpretation)*
+<br>
+
+***The optimal cutoff for both sensitivity and specificty using the new HCG test is cutoff #4, which is the point that maximizes both sensitivity and specificity (closes point to upper left corner of ROC curve).***
+
+<br>
+**4f)** Does the new test appear to perform better than the old test for determining pregnancy status? Why or why not? *(2 points, interpretation)*
+
+***Yes, the new test improves both sensitivity and specificity (larger area under the ROC curv and closer to upper left corner).***
+
+<br>

@@ -1,0 +1,189 @@
+---
+title: "BST 600 Assignment 14"
+subtitle: "Binary data - logistic regression"
+author: "Matt Massey"
+date: "`r Sys.Date()`"
+output: html_notebook
+---
+
+<br>
+<font size="3">
+*Due: Monday, November 28, 9:00am*
+<br>
+*Total Points = 38*
+</font>
+<br><br>
+
+
+**Directions:** Open this file in RStudio. Complete each exercise in the assignment, and be sure to run any code that you write. Click "Preview" to view the .html report as you go. When you're finished, submit the .html report on Canvas. Remember, all R code you need to complete this assignment can be found in the "BST 600 R Code" document.
+
+Exercises denoted with *(4 points, code/output and interpretation)* require both R code/output and a written explanation/interpretation of the output in your own words, using complete sentences. Exercises denoted with *(2 points, code/output)* require just R code/output, and exercises denoted with *(2 points, interpretation)* require just a written answer.
+
+
+<br>
+
+## Binary data - logistic regression (Lecture 14.1)
+
+<br>
+**Exercise 1:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. To get started, import the lead.xlsx dataset.
+```{r}
+library(readxl)
+lead<-read_excel('lead.xlsx', col_names=TRUE, na="")
+```
+
+In the last assignment, we investigated the impact of living near the smelter in the first two years of life on lead exposure. This time, we'll utilize logistic regression to explore this relationship. 
+
+<br>
+**1a)** The outcome variable in this analysis is lead exposure (*Group*). Define $p$ and explain what $\log\left(\frac{p}{1-p}\right)$ represents in context of the problem. Note: To view a long math equation like the one in the previous sentence, you can hover over it with your cursor in the code window in RStudio OR preview the report to view it in the html report in RStudio. *(2 points, interpretation)*
+
+***Let $p$ represent the probability of lead exposure in the community located near the smelter. The log of the odds of having lead exposure in the community is given by $\log\left(\frac{p}{1-p}\right)$ which allows us to perform logistic regression on binary outcome variables.***
+
+
+<br>
+**1b)** Fit a logistic regression model with *fst2yrs* as the predictor variable and *Group* as the outcome variable. Write down the logistic regression equation, being sure to define any variables as necessary. Hint: Be sure to check the *table* command for the outcome variable in case you need to reorder the categories. Remember that the category listed **second** is treated as the category of interest for the logistic regression model. *(4 points, code/output and interpretation)*
+
+```{r}
+# check order of outcome variable
+table(lead$Group) 
+# check order of predictor variable
+table(lead$fst2yrs)
+```
+
+```{r}
+# transform outcome variable
+lead$Group <- as.factor(lead$Group)
+table(lead$Group)
+```
+
+```{r}
+# logistic regression model
+logistic.1 <- glm(Group ~ fst2yrs, family=binomial, data=lead)
+summary(logistic.1)$coef
+```
+
+***Let $p$ be the probability of lead exposure and $x$ be whether children lived near the smelter during their first two years of life (0=No,1=Yes). The equation for the logistic regression model is given by:***
+
+$\log\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1x$
+
+$\log\left(\frac{p}{1-p}\right) = -0.7270487 + 0.6698903x$
+
+
+
+<br>
+**1c)** Calculate the predicted log odds of lead exposure for a child who lived near the smelter during their first two years of life. In addition to the R code, show (write) how these values would be calculated using the regression equation. *(4 points, code/output and interpretation)*
+
+```{r}
+# prediction of logistic regression model for a child who did live near teh smelter during their first two years of life
+as.numeric(predict(logistic.1, data.frame(fst2yrs="Yes")))
+```
+
+$\log\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1x$
+
+$\log\left(\frac{p}{1-p}\right) = -0.7270487 + 0.6698903x$
+
+$\log\left(\frac{p}{1-p}\right) = -0.7270487 + 0.6698903(1)$
+
+$\log\left(\frac{p}{1-p}\right) = -0.0571584$
+
+***The predicted log odds of lead exposure for a child who lived near the smelter during their first two years of life (fst2yrs=Yes=1) is -0.05715841.***
+
+<br>
+**1d)** What is the predicted odds of lead exposure for a child who lived near the smelter during their first two years of life? *(4 points, code/output and interpretation)*
+
+```{r}
+exp(-0.7270487 + 0.6698903*1)
+```
+
+$\frac{p}{1-p} = e^{\beta_0 + \beta_1x}$
+
+$\frac{p}{1-p} = e^{-0.7270487 + 0.6698903(1)}$
+
+$\frac{p}{1-p} = 0.944444$
+
+***The predicted odds of lead exposure for a child who lived near the smelter during their first two years of life (fst2yrs=Yes=1) is 0.9444445.***
+
+
+
+<br>
+**1e)** What is the predicted probability of lead exposure for a child who lived near the smelter during their first two years of life? *(4 points, code/output and interpretation)*
+
+```{r}
+exp(-0.7270487 + 0.6698903*1) / (1+exp(-0.7270487 + 0.6698903*1))
+```
+
+$p = \frac{e^{\beta_0 + \beta_1x}}{1+e^{\beta_0 + \beta_1x}}$
+
+$p = \frac{e^{-0.7270487 + 0.6698903*1}}{1+e^{-0.7270487 + 0.6698903*1}}$
+
+$p = 0.4857143$
+
+***The predicted probability of lead exposure for a child who lived near the smelter during their first two years of life (fst2yrs=Yes=1) is 0.4857143.***
+
+
+<br>
+**1f)** Interpret the estimated intercept and slope (untransformed) from the logistic regression output in part (b) in context of the problem. *(4 points [2 for each], interpretation)*
+
+***$\beta_0$: The log odds of lead exposure of children in the community is -0.7270487 when the child did not live near the smelter during their first two years of life.***
+
+***$\beta_1$: Children in the community who lived near the smelter during their first two years of life are associated with a 0.6698903 increase in their log odds of lead exposure.***
+
+
+
+<br>
+**1g)** Exponentiate the coefficients (intercept and slope) from the logistic regression model, and interpret both of the exponentiated regression coefficients in the context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+exp(coef(logistic.1))
+```
+
+***$e^{\beta_0}$: The odds of lead exposure of children in the community is 0.4833333 when the children did not live near the smelter during their first two years of life.***
+
+***$e^{\beta_1}$: Children who lived near the smelter during their first two years of life are associated with a 1.9540230 times increase in the odds of lead exposure.***
+
+
+<br>
+**Exercise 2:** We are interested in the impact of the total number of years living near the smelter and the HH-Index on whether or not the child has a high performance IQ score. 
+
+**2a)** Create an indicator variable called *iqp_high* that is equal to 1 when the performance IQ score (*iqp*) is greater than or equal to 100 points, and equal to 0 when the performance IQ score (*iqp*) is less than 100 points. We'll define *p* to be the probability of having a high performance IQ score. In order to fit the logistic regression model properly in the next question, we need to ensure that the categories of the *iqp_high* variable are in the correct order. Print a frequency table of *iqp_high* to assess whether the variable is set up correctly (i.e., the '1' category should be listed **second**). If it is not, reorder the categories of the *iqp_high* variable. (*2 points, code/output*)
+
+```{r}
+# indicator variable for high performance IQ
+lead$iqp_high <- as.factor((lead$iqp >= 100)*1)
+```
+
+```{r}
+# check order of outcome variable
+table(lead$iqp_high)
+```
+
+***New indicator variable created for high performance IQ scores (1 for iqp >= 100); category is listed second in table and is correct for logistic regression.***
+
+<br>
+**2b)** Fit a logistic regression model with *iqp_high* as the outcome variable and *totyrs* and *hh_index* as predictors. Write down the regression equation, being sure to define any variables as necessary. *(4 points, code/output and interpretation)*
+
+```{r}
+# logistic regression model
+logistic.2 <- glm(iqp_high ~ totyrs+hh_index, family=binomial, data=lead)
+summary(logistic.2)$coef
+```
+
+***Let $p$ be the probability of having a high performance IQ score (>=100), $x_1$ be the total number of years living near the smelter, and $x_2$ be the HH-index score. The equation for the logistic regression model is given by:***
+
+$\log\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1x_1 + \beta_2x_2$
+
+
+<br>
+**2c)** Exponentiate the coefficients from the logistic regression model, and interpret all three of the exponentiated coefficients in context of the problem. *(6 points [2 for each], code/output and interpretation)*
+
+```{r}
+exp(coef(logistic.2))
+```
+
+***$e^{\beta_0}$: The odds of a child in the community having a high performance IQ is 6.7479640 when the child has spent 0 years living near the smelter and with an HH-index of 0.***
+
+***$e^{\beta_1}$: For each additional year a child has lived near the smelter, the odds of having a high performance IQ score increases by 0.8970771, when holding HH-index constant.***
+
+***$e^{\beta_2}$: For each additional HH-index point a child has, the odds of having a high performance IQ score increases by 0.9834564, when holding the total years living near the smelter constant.***
+
+
+<br>

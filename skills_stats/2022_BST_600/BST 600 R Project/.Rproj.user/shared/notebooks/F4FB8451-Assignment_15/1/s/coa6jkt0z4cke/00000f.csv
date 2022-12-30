@@ -1,0 +1,2 @@
+"0","library(readxl)"
+"0","lead<-read_excel('lead.xlsx', col_names=TRUE, na="""")"

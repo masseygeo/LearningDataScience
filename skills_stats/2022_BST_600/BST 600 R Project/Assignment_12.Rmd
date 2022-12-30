@@ -1,0 +1,281 @@
+---
+title: "BST 600 Assignment 12"
+subtitle: |
+    | Part 1: Binary data - numerical and graphical summaries, binomial distribution, 1 group estimation
+    | Part 2: Binary data - 1 group testing, power, and sample size
+author: "Matt Massey"
+date: "`r Sys.Date()`"
+output: html_notebook
+---
+
+<br>
+<font size="3">
+*Due: Monday, November 14, 9:00am*
+<br>
+*Total Points = 54*
+</font>
+<br><br>
+
+
+**Directions:** Open this file in RStudio. Complete each exercise in the assignment, and be sure to run any code that you write. Click "Preview" to view the .html report as you go. When you're finished, submit the .html report on Canvas. Remember, all R code you need to complete this assignment can be found in the "BST 600 R Code" document.
+
+Exercises denoted with *(4 points, code/output and interpretation)* require both R code/output and a written explanation/interpretation of the output in your own words, using complete sentences. Exercises denoted with *(2 points, code/output)* require just R code/output, and exercises denoted with *(2 points, interpretation)* require just a written answer.
+
+
+<br>
+
+## Part 1: Binary data - numerical and graphical summaries, binomial distribution, 1 group estimation (Lecture 12.1)
+
+<br>
+**Exercise 1:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. To get started, import the lead.xlsx dataset.
+
+```{r}
+library(readxl)
+lead<-read_excel('lead.xlsx', col_names=TRUE, na="")
+```
+
+
+Create a bar graph or pie chart for the *Group* variable to display the distribution of lead exposure status (Exposed vs. Control) in this dataset. *(2 points, code/output)*
+
+```{r}
+barplot(table(lead$Group), xlab="Lead Exposure Group", ylab="Frequency")
+```
+
+
+
+<br>
+**Exercise 2:** Create one bar graph showing the distribution of sex in each lead exposure group (*Group*) in this sample. Briefly describe the results. *(4 points, code/output and interpretation)*
+
+```{r}
+barplot(table(lead$sex, lead$Group), beside=TRUE, xlab="Distribution of Sex for Lead Exposure Group", ylab="Frequency", legend.text=names(table(lead$sex, lead$Group)[,1]), args.legend=list(x="top", inset=c(1,-0.1)))
+```
+
+***For children in the community located near a smelter and included in this study, there were approximately half as many females exposed to lead compared to males exposed to lead. There were almost two thirds as many females not exposed to lead as compared to males not exposed to lead.***
+
+
+<br>
+**Exercise 3:** This exercise explores the relationship between lead exposure and full-scale IQ score.
+
+**3a)** Create an indicator variable called *iqf_high* that equals 1 if the child has a full-scale IQ score greater than or equal to 100, and 0 if the child has a full-scale IQ score less than 100. *(2 points, code/output)*
+
+```{r}
+lead$iqf_high <- as.factor((lead$iqf >= 100)*1)
+```
+
+
+<br>
+**3b)** Compute both the frequencies and relative frequencies of high/low full-scale IQ score. What percentage of children in this study have a high full-scale IQ score? Hint: Your answer should be 24.19%. If this doesn't match your results, you may have made an error in part (a). *(4 points, code/output and interpretation)*
+
+```{r}
+# frequencies of iqf_high
+table(lead$iqf_high)
+
+# relative frequencies of iqf_high
+prop.table(table(lead$iqf_high))
+```
+***Of the 124 children included in this study, 24.19% have a high full-scale IQ score.***
+
+
+<br>
+**3c)** How many subjects are exposed to lead and have a low full-scale IQ score? Use the binary lead exposure variable (*Group*). *(4 points, code/output and interpretation)*
+
+```{r}
+xtabs(~ Group + iqf_high, data=lead)
+```
+***Of the 46 children exposed to lead in this sample, 38 of them have a low full-scale IQ score.***
+
+
+<br>
+**3d)** How does the proportion of subjects who have a low full-scale IQ score compare among the children exposed to lead and unexposed to lead? Hint: You need to calculate the probability of having a low full-scale IQ score among subjects exposed to lead and the probability of having a low full-scale IQ score among subjects unexposed to lead in order to answer this question. *(4 points, code/output and interpretation)*
+
+```{r}
+proportions(xtabs(~Group + iqf_high, data=lead), margin=1)
+```
+***Of the children not exposed to lead, 71.79% have a low full-scale IQ score. Of the children exposed to lead, 82.61% have a low full-scale IQ score. Therefore, the probability of a low full-scale IQ score is higher in children exposed to lead.***
+
+<br>
+**3e)** How does the proportion of subjects who are exposed to lead compare among the children with low IQ scores and high IQ scores? Hint: You need to calculate the probability of lead exposure among subjects who have a low full-scale IQ score and the probability of lead exposure among subjects with a high full-scale IQ score in order to answer this question. *(4 points, code/output and interpretation)*
+
+```{r}
+proportions(xtabs(~Group + iqf_high, data=lead), margin=2)
+```
+
+***40.43% of children who have a low full-scale IQ score have been exposed to lead, while 26.67% of the children who have a high full-scale IQ score are exposed to lead. Therefore, the probability of lead exposure is higher among children who have a low full-scale IQ score compared to children with a high full-scale IQ score.***
+
+
+<br>
+**Exercise 4:** We are interested in using the information in this sample to estimate $p$, the proportion of children in the community who have a high full-scale IQ score (full-scale IQ greater than or equal to 100). In the last exercise, you should have already created a variable called *iqf_high* to represent this information in the sample.
+
+**4a)** Calculate a 95% confidence interval for $p$ using the exact binomial method. Interpret the interval in context of the problem. Hint: Be sure that the interval is being calculated according to your category of interest. *(4 points, code/output and interpretation)*
+
+```{r}
+# current table order
+table(lead$iqf_high)
+```
+
+```{r}
+# change table order for high full-scale IQ first
+lead$iqf_high <- factor(lead$iqf_high, levels=c('1','0'))
+table(lead$iqf_high)
+```
+
+```{r}
+binom.test(xtabs(~iqf_high, data=lead), conf.level = 0.95)$conf.int
+```
+***We are 95% confident that the true proportion of children in the community who have a high full-scale IQ score is between 16.96% and 32.7% using the exact binomial method.***
+
+
+<br>
+**4b)** Is it appropriate to use the normal approximation to calculate the 95% confidence interval for $p$? Why or why not? *(2 points, interpretation)*
+
+***The normal approximation is appropriate only when $n*p*(1-p)\geq5$, where $n=124$ and $\hat{p}=30/124=0.241935$:***
+
+$n*p*(1-p)\geq5$
+
+$124*0.241935*(1-0.241935)\geq5$
+
+$22.74\geq5$
+
+***Since 22.74 is greater than 5, the normal approximation is appropriate in this case.***
+
+
+
+<br>
+**4c)** Recalculate the 95% confidence interval for $p$ using the normal approximation method (identify the interval, but you do not need to interpret it). How does it compare to the interval calculated using the exact binomial method? *(4 points, code/output and interpretation)*
+
+```{r}
+# check to see if table is in correct order
+table(lead$iqf_high)
+```
+
+```{r}
+# calculate CI using normal approximation
+prop.test(xtabs(~iqf_high, data=lead), conf.level=0.95)$conf.int
+```
+
+***We are 95% confident that the true proportion of children in the community who have a high full-scale IQ score is between 17.15% and 32.86% using the normal approximation.***
+
+
+<br>
+**4d)** In the general population, 50% of children have a full-scale IQ score greater than or equal to 100. Use the 95% confidence interval in (a) or (c) to test whether the proportion of children in this community who have a high full-scale IQ score is equal to 50%. Use the confidence interval to answer this question (i.e., do not calculate a p-value or perform any additional computations). *(2 points, interpretation)*
+
+***This question asks if the probability of children having a high full-scale IQ score is 0.5 in the general population. Using the sample ($\hat{p}$) to estimate $p$, we see that 0.5 is in neither confidence interval (using exact binomial or normal approximation), and therefore 0.5 is not a plausible probability.***
+
+
+
+<br>
+
+## Part 2: Binary data - 1 group testing, power, and sample size (Lecture 12.2)
+
+<br>
+**Exercise 5:** For each question below, define $p$ (the population proportion of interest), write the null and alternative hypotheses, and identify $\hat{p}$.
+
+**5a)** Researchers are interested in assessing whether the percentage of Kentucky newborns with HIV positive mothers who are HIV positive at birth is equal to 20%. 198 newborns of mothers with HIV were screened for HIV at a Kentucky hospital. 66 infants tested positive for HIV, and 132 infants tested negative for HIV. *(2 points, interpretation and computation, no R code needed)*
+
+***$p$: The proportion of Kentucky newborns with HIV positive mothers who are HIV positive at birth.***
+
+***$p_0=0.2$: The proportion determined by the researchers to test for significance.***
+
+***$\hat{p}=66/198=0.3333$: The proportion of Kentucky newborns who are HIV positive and have mothers who are HIV positive from the sample taken at the Kentucky hospital; estimate of the population proportion.***
+
+***The null hypothesis is $H_0: p=0.20$***
+
+***The alternative hypothesis is $H_A: p\neq0.20$***
+
+
+<br>
+**5b)** An experiment is designed to test the potency of a drug on rats. When testing a lower dosage of the drug, 14% of rats responded to the treatment. Researchers give the current (higher) dosage of the drug to 75 rats. They observe that 19 rats responded to the treatment and 56 rats did not respond to the treatment. They wish to test whether the response rate on the higher dose of the drug is different from the known response rate on the lower dose of the drug. *(2 points, interpretation and computation, no R code needed)*
+
+***$p$: The response rate of rats on the higher dose of the treatment drug.***
+
+***$p_0=0.14$: The response rate of rats on the lower dose of the treatment drug, to compare to the response rate of the higher dose.***
+
+***$\hat{p}=19/75=0.2533$: The response rate of the sample of 75 rats on the higher dose of the treatment drug; estimate of the population response rate.***
+
+***The null hypothesis is $H_0: p=0.14$***
+
+***The alternative hypothesis is $H_A: p\neq0.14$***
+
+
+<br>
+**Exercise 6:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. If you have not done so already, import the lead.xlsx dataset.
+
+A reporter for the local newspaper has reported that 34% of children in this community are exposed to lead. Use this sample of children to investigate whether or not that claim is true.
+
+**6a)** Define $p$ and write down the null and alternative hypotheses. *(2 points, interpretation)*
+
+***$p$: The proportion of all children in this community who are exposed to lead.***
+
+***The null hypothesis $H_0: p=0.34$***
+
+***The alternative hypothesis $H_A: p\neq0.34$***
+
+
+
+<br>
+**6b)** Perform the hypothesis test described above. Report the p-value and make a conclusion in the context of the problem. Hint: Be sure that the test is being performed according to your category of interest. *(4 points, code/output and interpretation)*
+
+```{r}
+# current order of lead exposure groups
+table(lead$Group)
+```
+
+```{r}
+# change order of categoricals for hypothesis test of those exposed to lead
+lead$Group <- factor(lead$Group, levels=c('Exposed', 'Control'))
+# check new order
+table(lead$Group)
+```
+
+
+```{r}
+# hypothesis test
+binom.test(xtabs(~Group, data=lead), alternative="two.sided", p=0.34, conf.level=.95)
+```
+
+***The p-value is 0.507. Since the p-value is greater than 0.05, we do not have evidence to suggest that the proportion of children in this community exposed to lead is different than the reported 34%, and we fail to reject the null hypothesis.***
+
+
+<br>
+**Quick R Lesson:** All of the functions that we have used in BST 600 so far come with the base configuration of the R software. However, there are many, many more functions that are contained in external "packages" that can be installed in R, or users can also define their own functions to execute various mathematical/statistical procedures that are not contained in the base configuration. 
+
+The block of code below initializes a new function called *power.binom.test* that is not contained in the base configuration of R. Run the block of R code below to initialize the function. You will not see any output when you run the code, but you will see in the "Environment" box in the upper right corner of RStudio that there is a function listed called *power.binom.test*. To learn about how to use the *power.binom.test* function, see the "BST 600 R Code" document.
+
+
+<!-- RUN THIS BLOCK OF R CODE BEFORE MOVING ON -->
+```{r include=FALSE}
+power.binom.test <- function(p0, p_true, n=NULL, power=NULL, sig.level=0.05, alternative="two.sided"){
+  sig = ifelse(alternative=="one.sided", sig.level, (sig.level/2))
+  if(is.null(power)){
+    power=pnorm(sqrt((p0*(1-p0))/(p_true*(1-p_true)))*(qnorm(sig)+((abs(p0-p_true)*sqrt(n))/sqrt(p0*(1-p0)))))
+    return(cat(" p0 =",p0,"\n","p_true =",p_true,"\n","n =",n,"\n","power =",power,"\n","sig.level=",sig.level,"\n","alternative =",alternative))
+  }else if(is.null(n)){
+    n=(p0*(1-p0)*(qnorm(1-sig)+(qnorm(power)*sqrt((p_true*(1-p_true))/(p0*(1-p0)))))^2)/(p_true-p0)^2
+    return(cat(" p0 =",p0,"\n","p_true =",p_true,"\n","n =",n,"\n","power =",power,"\n","sig.level=",sig.level,"\n","alternative =",alternative))
+  }else{
+    return("n or power must be set to NULL")
+  }
+}
+```
+
+
+<br>
+**Exercise 7:** Suppose that 16% of all Americans are exposed to potentially harmful levels of lead. From our preliminary data, we estimate that the prevalence of lead exposure in this community is 37.1% How many subjects would we need to recruit from this community to have 90% power to demonstrate that the prevalence of lead exposure in this community is different from that in the whole country? Use a significance level of $\alpha=0.05$. *(4 points, code/output and interpretation)*
+
+```{r}
+power.binom.test(p0=0.16, p_true=0.371, n=NULL, power=0.90, sig.level=.05, alternative="two.sided")
+```
+
+***We would need to recruit 41 subjects from this community to demonstrate that the prevalence of lead exposure in this community is different than in the whole country with 90% power at the $\alpha=0.05$ level.***
+
+<br>
+**Exercise 8:** A reporter for the local newspaper has reported that 20% of children in this community lived near the smelter in their first two years of life. What power do we have in our sample to demonstrate that this is not true? Use a significance level of $\alpha=0.05$. *(4 points, code/output and interpretation)*
+
+```{r}
+power.binom.test(p0=0.2, p_true=0.371, n=124, power=NULL, sig.level=.05, alternative="two.sided")
+```
+
+***Using 124 children from this community and a significance level of $\alpha=0.05$, we can demonstrate that the proportion of children in this community lived near the smelter during their first two years of life is different than 0.20 with 98.97994% power.*** 
+
+<br>
+

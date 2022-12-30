@@ -1,0 +1,209 @@
+---
+title: "BST 600 Assignment 2"
+author: "Matthew Massey"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+subtitle: "Part 1: Continuous data - numerical and graphical summaries\n\n<br>\nPart
+  2: Continuous data - normal distribution, Central Limit Theorem\n"
+---
+
+<br>
+<font size="3">
+*Due: Tuesday, September 6, 9:00am*
+<br>
+*Total Points = 48*
+</font>
+<br><br>
+
+
+**Directions:** Open this file in RStudio. Complete each exercise in the assignment, and be sure to run any code that you write. Click "Preview" to view the .html report as you go. When you're finished, submit the .html report on Canvas. Remember, all R code you need to complete this assignment can be found in the "BST 600 R Code" document.
+
+Exercises denoted with *(4 points, code/output and interpretation)* require both R code/output and a written explanation/interpretation of the output in your own words, using complete sentences. Exercises denoted with *(2 points, code/output)* require just R code/output, and exercises denoted with *(2 points, interpretation)* require just a written answer.
+
+
+
+<br>
+
+## Part 1: Continuous data - numerical and graphical summaries (Lecture 2.1)
+
+This section uses the lead.xlsx dataset. The study included children living near a smelter to examine whether lead exposure from the smelter impacts the children's psychological and neurological functioning. For more information, read the lead data dictionary on the Canvas site. To get started, import the lead.xlsx dataset.
+
+```{r}
+library(readxl)
+lead <- read_excel("lead.xlsx", col_names=TRUE, na="")
+```
+
+<br>
+**Exercise 1:** Suppose we're interested in summarizing the age of children in this sample.
+
+**1a)** What is the mean and standard deviation of age in this sample? *(4 points, code/output and interpretation)*
+
+```{r}
+#mean
+mean(lead$age, na.rm=TRUE)
+
+#standard deviation
+sd(lead$age, na.rm=TRUE)
+```
+
+***The mean age of children in the lead dataset is 8.935 years with a standard deviation of 3.537067 years***
+
+
+<br>
+**1b)** Calculate and report the minimum, first quartile, median, third quartile, and maximum for age in this sample. *(4 points, code/output and interpretation)*
+
+```{r}
+# minimum, first quartile, median, third quartile, maximum
+quantile(lead$age, na.rm=TRUE)
+```
+
+***Age of children in the lead dataset can be described as having a minimum of 3.75 years, first quartile of 6.17 years, median of 8.375 years, third quartile of 12.02 years, and a maximum of 15.92 years.***
+
+<br>
+**Exercise 2:** Which lead exposure group (Control or Exposed) has a higher mean full-scale IQ score? *(4 points, code/output and interpretation)*
+
+```{r}
+# means of full-scale iq for variable Group (control or exposed)
+tapply(lead$iqf, lead$Group, mean, na.rm=TRUE)
+```
+
+***Children included in the study and not exposed to lead (Control Group) have a higher mean full-scale IQ score of 92.88462 compared to the group of children exposed to lead who have a mean full-scale IQ score of 88.02174.***
+
+
+<br>
+**Exercise 3:** Suppose we're interested in summarizing the total years living near the smelter in this sample.
+
+**3a)** Summarize the total years living near the smelter with a histogram. Describe the graph by commenting on the shape, and report the median and interquartile range. *(4 points, code/output and interpretation)* 
+
+
+```{r}
+# histogram of years living near smelter
+hist(lead$totyrs, freq=TRUE, col="darkgray", xlab="Total years living near smelter", main="")
+
+# quartile summary
+quantile(lead$totyrs, na.rm=TRUE)
+```
+
+***A histogram of total years living near the smelter for children included in the lead study shows a right-skewed distribution, a median of 6 years, and an IQR of 5 years (75%-25%, 9-4 years).***
+
+<br>
+**3b)** Calculate the mean total years living near the smelter. Is it larger or smaller than the median? *(4 points, code/output and interpretation)* 
+
+```{r}
+#mean
+mean(lead$totyrs, na.rm=TRUE)
+
+#median
+median(lead$totyrs, na.rm=TRUE)
+```
+
+***The mean total years of children living near the smelter in the study is 6.741935 years, which is slightly higher than the median of 6 years. This is expected due to the right-skewed distribution which pulls the mean higher than the median.***
+
+
+<br>
+**3c)** How could we have used the shape of the histogram in (a) to know whether the mean or median was larger without calculating them? *(2 points, interpretation)*
+
+<br>
+***As stated above, the histogram is skewed to the right, which shifts the calculated mean higher than the median value.***
+
+
+
+<br>
+**Exercise 4:** Summarize the dominant hand finger-wrist tapping rate with a boxplot. Change the $y$ axis label to something descriptive of the variable. Be sure to interpret the plot by commenting on the center, spread, and shape. *(4 points, code/output and interpretation)*
+
+```{r}
+# boxplot
+boxplot(lead$maxfwt, ylab="Finger-wrist tapping rate (dominant hand)")
+```
+
+***The boxplot above summarizes the dominant hand finger-wrist tapping rate of children included in the dataset. The bold black line marks the median, which is about 52 taps per 10 seconds. The gray box marks the interquartile range where the 25% percentile (1st quartile) is about 45 taps per 10 seconds, and the 75% percentile (3rd quartile) is about 60 taps per 10 seconds. The range of the data is constrained by the maximum and minimum hollow circles at the top (about 85 taps per 10 seconds) and bottom (about 12 taps per 10 seconds), respectively. Data points that are considered outliers (greater than or less than 1.5 x IQR from the median) are shown by hollow circles. The shape of the boxplot is approximately symmetric.***
+
+
+<br>
+**Exercise 5:** Make a scatterplot showing the relationship between total years living near the smelter and performance IQ score. Does there appear to be an association between the two variables? If so, is it positive or negative? *(4 points, code/output and interpretation)*
+
+```{r}
+# scatterplot
+plot(iqp~totyrs, data=lead, xlab="Total years living near smelter", ylab="Performance IQ score", main="", pch=19)
+```
+
+***The scatterplot above shows the relationship between performance IQ scores (y axis) versus the total number of years living near the smelter (x axis). There is possibly a very weak negative correlation of the two variables, where performance IQ decreases with increasing number of years living near the smelter.***
+
+<br>
+
+## Part 2: Continuous data - normal distribution, Central Limit Theorem (Lecture 2.2)
+
+
+<br>
+**Exercise 6:** These questions should be answered in general about the Central Limit Theorem.
+
+**6a)** Explain in your own words what a sampling distribution is. *(2 points, interpretation)*
+
+***A sampling distribution is the distribution of means calculated from multiple samples drawn from the same population.***
+
+
+<br>
+**6b)** Explain in your own words what the Central Limit Theorem says. *(2 points, interpretation)*
+
+***The central limit theorem tells us that the sampling distribution is normally distributed given a large enough sample size no matter the shape of the population distribution.***
+
+
+<br>
+**6c)** Open the image called "CLT_histograms.jpg" to view the distribution of a particular continuous variable in the population and the sample in four different scenarios. You do NOT need to import the JPG image in your R Notebook. For each scenario, briefly explain why you would or would not be able to rely on normality of the sampling distribution for data analysis. *(4 points [1 for each], interpretation)*
+
+***Scenario 1 shows normal population and sample distributions, with a relatively large sample size (n=100). The sampling distribution will be normal because the population distribution is normal and because the sample size is relatively large (central limit theorem).***
+
+<br>
+***Scenario 2 shows a normal population distribution, and a left-skewed sample distribution with a small sample size (n=10). The sampling distribution will be normal because the population distribution is normal, but the central limit theorem does not apply due to the small sample.***
+
+<br>
+***Scenario 3 shows a left-skewed population distribution (non-normal) and a relatively large sample (n=100) that also has a left-skewed shape. The sampling distribution will be normal because the central limit theorem applies for the large sample size.***
+
+<br>
+***Scenario 4 shows a left-skewed population distribution (non-normal) and a left-skewed sample distribution with a small sample size (n=10). The sampling distribution will not be normal because neither the population distribution is normal, nor the sample size is sufficiently large enough for the central limit theorem to apply.***
+
+
+
+
+
+<br>
+**Exercise 7:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. If you have not done so already, import the lead.xlsx dataset.
+
+**7a)** The *lead.xlsx* dataset contains data on a sample of size n=124. What population do you think the sample is representative of in this study? In other words, who might the sample be generalizable to? *(2 points, interpretation)*
+
+<br>
+***The lead dataset was collected from a sample of children in a community located near a smelter. The sample could represent the total population of this specific community, or a larger population of children from multiple communities located near smelters.****
+
+
+<br>
+**7b)** Refer to the histogram you made in Exercise 3a which shows the distribution of the total years living near the smelter in the sample. Based on this information, do you think that the total years living near the smelter is normally distributed in the population? *(2 points, interpretation)*
+
+<br>
+***The histogram above shows the distribution of the total years living near the smelter in the lead dataset sample. The sample distribution is right-skewed and consists of a relatively large number of datapoints (n=124), therefore it should reasonably approximate the population distribution. The population distribution is likely also right-skewed (non-normal).***
+
+
+<br>
+**7c)** Describe in your own words what the sampling distribution of the mean total years living near the smelter is. *(2 points, interpretation)*
+
+<br>
+***The sampling distribution of the mean total years of children living near the smelter is the theoretical distribution of means collected from multiple samples taken from the same population. The population here is either all children in this specific community or children in all communities located near smelters.***
+
+
+<br>
+**7d)** Do you think that the sampling distribution of the mean total years living near the smelter is normally distributed? Why or why not? *(2 points, interpretation)*
+
+<br>
+***The sampling distribution of the mean total years living near a smelter should be normally distributed because of the relatively large sample size (n=124) and application of the central limit theorem, despite the sample and population distributions being right-skewed.***
+
+
+<br>
+**7e)** Can we rely on normality for analyzing the "total years living near the smelter" variable in this study? Why or why not? *(2 points, interpretation)*
+
+<br>
+***Yes, the sampling distribution is normally distributed in this case because of the large sample size and the central limit theorem.***
+
+
+<br>
+

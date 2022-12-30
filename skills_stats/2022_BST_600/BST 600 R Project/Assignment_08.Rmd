@@ -1,0 +1,283 @@
+---
+title: "BST 600 Assignment 8"
+subtitle: |
+    | Part 1: Continuous data - regression diagnostics
+    | Part 2: Continuous data - multiple regression (model building, confounding)
+author: "Matt Massey"
+date: "`r Sys.Date()`"
+output: html_notebook
+---
+
+<br>
+<font size="3">
+*Due: Monday, October 17, 9:00am*
+<br>
+*Total Points = 72*
+</font>
+<br><br>
+
+
+**Directions:** Open this file in RStudio. Complete each exercise in the assignment, and be sure to run any code that you write. Click "Preview" to view the .html report as you go. When you're finished, submit the .html report on Canvas. Remember, all R code you need to complete this assignment can be found in the "BST 600 R Code" document.
+
+Exercises denoted with *(4 points, code/output and interpretation)* require both R code/output and a written explanation/interpretation of the output in your own words, using complete sentences. Exercises denoted with *(2 points, code/output)* require just R code/output, and exercises denoted with *(2 points, interpretation)* require just a written answer.
+
+
+<br>
+
+## Part 1: Continuous data - regression diagnostics (Lecture 8.1)
+
+<br>
+**Exercise 1:** Researchers aim to characterize the association between LDL cholesterol and BMI in adults, and they develop two working models to represent this association Model 1 uses the untransformed LDL cholesterol level and BMI, and Model 2 uses a squared transformation for LDL cholesterol as well as a log transformation for BMI. The regression equations are below. 
+
+Model 1: BMI = 1.04 + 3.12(LDL) + $e$  
+Model 2: log(BMI) = 0.04 + 2.01(LDL$^2$) + $e$
+
+After performing regression diagnostics, they find that Model 1 has some minor violations of the linearity and constant variance of the residuals assumptions, but Model 2 perfectly satisfies all of the regression assumptions. Based on this information, which model would you prefer to use and why? *(2 points, interpretation)*
+
+***The goal of this study is to characterize the association between LDL cholestorol and BMI in adults, and therefore the model needs to be interpretable. In this case, Model 1 provides the advantage of interpretability since both variables are kept in their original units. However, it should be noted that Model 2 does provide better predictions since the model is more accurate and the assumptions are strictly met.***
+
+
+<br>
+**Exercise 2:** Open the image called "regression_transformations.jpg". You do NOT need to import the JPG image in your R Notebook. For each of the four plots in the image (A, B, C, D), suggest at least one transformation that would help to linearize the relationship between the two variables. *(8 points [2 for each part], interpretation)*
+
+***For plot A, either the $x$ variable needs an increase in power (e.g., $x^2$) or the $y$ variable needs a decrease in power (e.g., $\sqrt{y}$).***
+
+***For plot B, either the $x$ or $y$ variable needs a decrease in power (e.g., $\sqrt{x}$ or $\sqrt{y}$).***
+
+***For plot C, either the $x$ or $y$ variable needs an increase in power (e.g., $x^2$ or $y^2$).***
+
+***For plot D, either the $y$ variable needs an increase in power (e.g., $y^2$) or the $x$ variable needs a decrease in power (e.g., $\sqrt{x}$).***
+
+
+<br>
+**Exercise 3:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. To get started, import the lead.xlsx dataset.
+
+```{r}
+library(readxl)
+lead <- read_excel('lead.xlsx', col_names=TRUE, na="")
+```
+
+In the last assignment, we fit a linear regression model relating age to dominant hand finger-wrist tapping rate among children in the community being studied. Now, let's check whether or not the assumptions of that model are satisfied.
+
+**3a)** To get started, refit the regression model relating age (outcome) to the dominant hand finger-wrist tapping rate. You can copy your code from Assignment 7 Exercise 7b. Report the $R^2$ value from the model, and interpret it in the context of the problem. *(2 points, interpretation)*
+
+```{r}
+regression3 <- lm(maxfwt~age, data=lead)
+summary(regression3)
+```
+
+***The linear regression model relating dominant hand finger-wrist tapping rate to age in children of the community is characterized by an $R^2=0.4205$, which indicates that 42.05% of the variation in finger-wrist tapping rate of the dominant hand is explained by age of children in this community.***
+
+
+<br>
+**3b)** Do you think that the independence assumption is satisfied for this model? Why or why not? *(2 points, interpretation)*
+
+***The independence assumption is satisfied for this model because each observation comes from one individual child in the community, and the finger-wrist tapping rate of one child does not affect the rate of any other child in the community.***
+
+
+<br>
+**3c)** Make a scatterplot of *age* on the x-axis and *maxfwt* on the y-axis, and overlay the regression line on the plot. Do you think that the linearity assumption is satisfied? Why or why not? *(4 points, code/output and interpretation)* 
+
+```{r}
+# scatter plot
+plot(maxfwt~age, data=lead, xlab="Age (years)", ylab="Maximum finger-wrist tapping rate", main="", pch=19)
+
+# regression line on scatter plot
+abline(regression3)
+```
+
+***Based on the scatter plot above, the linearity assumption of the model is satisfied because there is a linear trend of the data following the regression line, and there is no indication of any other type of non-linear trend.***
+
+
+<br>
+**3d)** Make a residual plot for this model. Do you think that the assumption of constant variance of the residuals is satisfied? Why or why not? *(4 points, code/output and interpretation)*
+
+```{r}
+plot(regression3, 1)
+```
+
+***Based on the residual plot above, the variance of the residuals appears to be approximately constant for all values of x and the assumption of homoscedasticity is satisfied for the model. There are a few outliers, but the dataset is largely characterized by a consistent variance of the residuals for all values of age.***
+
+<br>
+**3e)** Make a normal QQ plot for this model. Do you think that the assumption of normality of the residuals is satisfied? Why or why not? *(4 points, code/output and interpretation)*
+
+```{r}
+plot(regression3, 2)
+```
+ 
+ ***Based on the Normal QQ plot above, the distribution of the residuals appears to be approximately normally distributed and satisfies the fourth assumption necessary for a simple bivariate linear regression model. There are a few points on each end that deviate from the expected values, but the overall distribution lie along the expected values.***
+
+
+<br>
+**3f)** Would you recommend making any transformations to *age* or *maxfwt* in order to model their association using linear regression? Why or why not? *(2 points, interpretation)*
+
+***I would not recommend any transformations of either variables (age or maxfwt) because all assumptions for the simple linear regression model are met (independence, linearity, residual homoscedasticity, and residual normality). There are a few very minor violations of these requirements, but the goal of the study is to characterize the relationship between dominant hand finger-wrist tapping rate and age and this model provides that.***
+
+
+<br>
+**Exercise 4:** In addition to the amount of sleep a person gets, it's important that enough of that sleep is "deep sleep". Thus, researchers are working to develop a drug to increase the amount of deep sleep a person gets at night. To identify the dose-response relationship of the drug, a trial was performed where subjects receive varying doses of the drug (1-100 mg), and their response is recorded as the percent increase in deep sleep from baseline. For example, if a subject has 100 minutes of deep sleep without the drug and 110 minutes of deep sleep while on the drug, their response is 10%.
+
+Information from this sleep clinical trial is recorded in the sleep.xlsx dataset. For more information, read the sleep data dictionary on the Canvas site. To get started, import the sleep dataset.
+
+```{r}
+sleep <- read_excel('sleep.xlsx', col_names=TRUE, na="")
+```
+
+**4a)** The researchers would like to model the relationship between dose and response (percent increase in deep sleep) as accurately as possible, and they know that this relationship is not linear. Fit a preliminary linear regression model relating dose to response, and generate the following diagnostic plots: (a) scatterplot of dose vs. response with regression line overlaid, (b) residual plot, (c) normal QQ plot. Use the diagnostic plots to determine the appropriate transformation for either the dose or response variables. *(4 points, code/output and interpretation)* 
+
+```{r}
+# linear model
+regression4 <- lm(response~dose, data=sleep)
+summary(regression4)
+
+# scatter plot and regression line
+plot(response~dose, data=sleep, xlab="Dose (mg)", ylab="Response (% increase in deep sleep)", main="", pch=19)
+abline(regression4)
+
+# residual plot
+plot(regression4, 1)
+
+# QQ plot
+plot(regression4, 2)
+```
+
+***The assumptions for simple linear regression modeling of the association between response (percent increase of time in deep sleep) and dose of the new drug (mg) are not entirely met. (1) The data are independent as each response is measured in an individual who has no affect on other individuals in the study. It's possible if the subjects are sleeping together there may be some violation of this requirement, but we're not given enough information here. (2) The data show a cone shaped association and not a linear association in the scatter plot above. (3) The variance of the residuals is not consistent and heteroscedastic, with an overall cone shape as seen in the residual plot above. (4) The residuals are not normally distributed as the tail deviates largely from the predicted residuals as seen in the Normal QQ plot above.***
+
+***Due to the cone shape of the variance of residuals shown in the residual plot, we will start with a log(response) to meet the assumptions for a more appropriate linear regression model of the data.***
+
+
+<br>
+**4b)** Add new, transformed variable(s) to the *sleep* dataset that represent the transformation(s) you identified in part (a). Fit a linear regression model using the transformed variable(s). Write down the regression equation. If you use placeholder variables such as *x* and/or *y*, be sure to define them. *(4 points, code/output and interpretation)*
+
+```{r}
+# create new variable log of response due to cone shape of residual plot
+sleep$log.response <- log(sleep$response)
+
+# new linear regression model
+regression4.log <- lm(log.response~dose, data=sleep)
+summary(regression4.log)
+```
+
+***For $x$ being the dose of the experimental sleep drug (in milligrams) and $y$ being the response (percent increase in deep sleep), the equation of the new linear regression model is:***
+
+***$log(\hat{y})=0.018855+0.029122x$***
+
+<br>
+**4c)** Show that the assumptions are met for the new regression model. If they are not met, revise the previous questions using an appropriate transformation. *(4 points, code/output and interpretation)*
+
+```{r}
+# new scatter plot and new regression line
+plot(log.response~dose, data=sleep, xlab="Dose (mg)", ylab="log(Response) (% increase in deep sleep)", main="", pch=19)
+abline(regression4.log)
+
+# new residual plot
+plot(regression4.log, 1)
+
+# new QQ plot
+plot(regression4.log, 2)
+```
+***The new model using the log of the response satisfies all assumptions for a simple linear regression model. (1) The data are independent, same as the original model. (2) The data show a much more linear association with the new model here and are evenly distributed around the regression line, as seen in the new scatter plot and regression model. (3) The variance of the residuals is homoscedastic, as seen in the new residuals plot. (4) The residuals are normally distributed as seen in the new Normal QQ plot.***
+
+
+<br>
+**4d)** Using the transformed model, what is the predicted response for a subject on a 50 mg dose of the drug? *(4 points, code/output and interpretation)*
+
+```{r}
+# find exponent of log response at 50 mg dose
+exp(as.numeric(predict(regression4.log, data.frame(dose=50))))
+```
+
+***The new simple linear regression model using the log of the response and the age predicts a response of 4.370778% increase in sleep with a 50 mg dose of the experimental sleep drug studied in this experiment.***
+
+
+<br>
+
+## Part 2: Continuous data - multiple regression (model building, confounding) (Lecture 8.2)
+
+<br>
+**Exercise 5:** Researchers are examining the association between income and job satisfaction. They find that the unadjusted p-value from a bivariate model is 0.028. They also calculate the adjusted p-value for the association between income and job satisfaction after adjusting for baseline demographic variables such as sex, age, race, and education level. The adjusted p-value is 0.211. Which p-value (unadjusted or adjusted) should they use to report on the association between income and job satisfaction? Why? *(2 points, interpretation)*
+
+***Assuming that both models meet the requirements and that the researcher's can only choose one p-value to report, they should go with the unadjusted p-value of 0.028 because the goal of the study is only to characterize the association between income and job satisfaction. The unadjusted model does show that income is not entirely the cause of job satisfaction since the p-value of 0.211 is above the signficance level, and that other factors such as sex, age, race, and education level all play a role in job satisfaction.***
+
+
+<br>
+**Exercise 6:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. If you have not done so already, import the lead.xlsx dataset.
+
+In Part 1, we fit a linear regression model relating dominant hand finger-wrist tapping rate to age among children in this community. Researchers have a suspicion that the Hollingshead Index of social status (HH Index) and full-scale IQ score are also important predictors of the dominant hand finger-wrist tapping rate. 
+
+**6a)** Model dominant hand finger-wrist tapping rate with age, HH Index, and full-scale IQ score as predictors. Write down the regression equation, making sure to define any variables if necessary. *(4 points, code/output and interpretation)*
+
+```{r}
+# multiple linear regression model of dominant hand finger-wrist tapping rate
+mlr6 <- lm(maxfwt ~ age+hh_index+iqf, data=lead)
+summary(mlr6)
+```
+
+***The multiple linear regression model where $x_1$ is age, $x_2$ is the HH-index, $x_3$ is the full-scale IQ score, and $y$ is the dominant hand finger wrist tapping rate is given by the equation:***
+
+***$\hat{y}=0.08763+2.83982x_1+0.09706x_2+0.18380x_3$***
+
+
+<br>
+**6b)** Interpret each of the four coefficients in the model. *(8 points [2 for each], interpretation)*
+
+***$\hat{\beta}_0 = 0.08763$: On average, the dominant hand finger-wrist tapping rate is 0.08763 when age, HH-index, and full-scale IQ are all equal to 0.***
+
+***$\hat{\beta}_1 = 2.83982$: On average, the dominant hand finger-wrist tapping rate increases 2.83982 taps for every one year increase in age, while holding HH-index and full-scale IQ constant.***
+
+***$\hat{\beta}_2 = 0.09706$: On average, the dominant hand finger-wrist tapping rate increases 0.09706 taps for every one point increase in HH-index, while holding age and full-scale IQ constant.***
+
+***$\hat{\beta}_3 = 0.18380$: On average, the dominant hand finger-wrist tapping rate increases 0.18380 taps for every one point increase in full-scale IQ, while holding age and HH-index constant.***
+
+
+
+<br>
+**6c)** Report the adjusted $R^2$ value from the model in part (a) and interpret it in the context of the problem. *(2 points, interpretation)*
+
+***The adjusted $R^2$ value of the multiple linear regression model for dominant hand finger-wrist tapping rate is 0.4485, which indicates that 44.85% of the variation in dominant finger-wrist tapping rate is explained by age, HH-index, and full-scale IQ.***
+
+
+<br>
+**6d)** Assess whether the "absence of multicollinearity" assumption is satisfied in this model. *(4 points, code/output and interpretation)*
+
+```{r}
+# correlation between age and HH-index
+cor(lead$age, lead$hh_index, use="complete")
+# correlation between age and full-scale IQ
+cor(lead$age, lead$iqf, use="complete")
+# correlation between HH-index and full-scale IQ
+cor(lead$hh_index, lead$iqf, use="complete")
+```
+
+***The requirement for "absence of multicollinearity" is satisfied for this multiple linear regression model because there is little to no correlation between each of the predictor variables. The correlation between age and HH-index is -0.1013189, between age and full-scale IQ is 0.02311475, and between HH-index and full-scale IQ is -0.2375203. All of these correlations are near zero, which indicate little to no correlation between these variables.***
+
+<br>
+**6e)** Does HH Index have a significant association with dominant hand finger-wrist tapping rate after adjusting for age and full-scale IQ score? Write down the hypotheses for this test. Be sure to identify the p-value and make a conclusion in context of the problem. *(2 points, interpretation)*
+
+***In order to test the signficance of the association between HH-index and dominant hand finger-wrist tapping rate:*** 
+
+***The null hypothesis is $H_0: \beta_2=0$***
+
+***The alternative hypotheis is $H_A: \beta_2\neq0$***
+
+***The p-value is 0.17235. Since the p-value is less than the signficance level of 0.05, we fail to reject the null hypothesis and conclude that we do not have enough evidence to suggest that the association between HH-index and dominant hand finger-wrist tapping rate is signficant, while holding age and full-scale IQ constant.***
+
+
+<br>
+**6f)** Drop HH Index from the model (fit a new model with dominant hand finger-wrist tapping rate as the outcome and age and full-scale IQ score as predictors). Report the adjusted $R^2$ value and interpret it in the context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+# multiple linear regression model of dominant hand finger-wrist tapping rate
+mlr6f <- lm(maxfwt ~ age+iqf, data=lead)
+summary(mlr6f)
+```
+
+***The adjusted $R^2$ value of the new model for dominant hand finger-wrist tapping rate without HH-index as a predictor variable is 0.4434, which indicates that 44.34% of the variation in dominant hand finger-wrist tapping rate is explained by age and full-scale IQ. This is almost identical to the orginal model that included HH-index ($R^2=0.4485$), which indicates that HH-index did not provide much additional information to the model.***
+
+<br>
+**6g)** Based on the results throughout this exercise, should HH Index be included in the model of finger-wrist tapping rate? Why or why not? *(2 points, interpretation)*
+
+***No, HH-index should not be included in the model of dominant hand finger-wrist tapping rate because (1) it did not have a signficant association when used in a model (p-value=0.17235) and (2) the adjusted $R^2$ values of models with and without HH-index are 0.4485 and 0.4434, respectively, which indicates that it did not provide much additional information in explaining the variation of the dominant hand finger-wrist tapping rate. The model without HH-index is therefore preferred since it has a higher parsimony.*** 
+
+
+<br>

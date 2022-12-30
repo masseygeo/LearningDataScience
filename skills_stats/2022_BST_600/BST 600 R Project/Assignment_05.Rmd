@@ -1,0 +1,288 @@
+---
+title: "BST 600 Assignment 5"
+author: "Matt Massey"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+subtitle: "| Part 1: Continuous data - test for equality of variances\n| Part 2: Continuous
+  data - ANOVA, multiple testing\n"
+---
+
+<br>
+<font size="3">
+*Due: Monday, September 26, 9:00am*
+<br>
+*Total Points = 62*
+</font>
+<br><br>
+
+
+**Directions:** Open this file in RStudio. Complete each exercise in the assignment, and be sure to run any code that you write. Click "Preview" to view the .html report as you go. When you're finished, submit the .html report on Canvas. Remember, all R code you need to complete this assignment can be found in the "BST 600 R Code" document.
+
+Exercises denoted with *(4 points, code/output and interpretation)* require both R code/output and a written explanation/interpretation of the output in your own words, using complete sentences. Exercises denoted with *(2 points, code/output)* require just R code/output, and exercises denoted with *(2 points, interpretation)* require just a written answer.
+
+
+<br>
+
+## Part 1: Continuous data - test for equality of variances (Lecture 5.1)
+
+<br>
+**Exercise 1:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. To get started, import the lead.xlsx dataset.
+
+```{r}
+library(readxl)
+lead <- read_excel('lead.xlsx', col_names=TRUE, na="")
+```
+
+
+In Assignment 4 Exercise 9, we performed a two-group t-test to test whether the mean finger-wrist tapping rate in the dominant hand differs between female and male children in this community. The hypotheses for this test were:
+
+* $H_0: \mu_1 = \mu_2$
+* $H_A: \mu_1 \neq \mu_2$
+
+where $\mu_1$ is defined as the mean finger-wrist tapping rate among female children in this community, and $\mu_2$ is defined as the mean finger-wrist tapping rate among male children in this community. Recall that in order to perform the two-group t-test, we have to make an assumption about the equality of variances in these two groups.
+
+
+**1a)** Suppose that we didn't know whether we should assume that male and female children in this community have the same variation in their finger-wrist tapping rate measurements. One way to decide about this assumption is to examine numerical and graphical summaries of the variation in finger-wrist tapping rate among male and female children in our sample. Use numerical **and** graphical summaries to make an *informal judgment call* about whether the variation in finger-wrist tapping rate among male and female children in our sample appears to be similar. Note: There is no correct answer to this question since you are asked to make an *informal judgment call*, but you do need to use specific information in the numerical and graphical summaries to support your answer. *(4 points, code/output and interpretation)*
+
+```{r}
+boxplot(lead$maxfwt ~ lead$sex, data=lead, xlab="Sex", ylab="Maximum finger-wrist tapping rate", varwidth=TRUE, col='red')
+```
+```{r}
+tapply(lead$maxfwt, lead$sex, var, na.rm=TRUE)
+```
+```{r}
+tapply(lead$maxfwt, lead$sex, sd, na.rm=TRUE)
+```
+```{r}
+tapply(lead$maxfwt, lead$sex, IQR, na.rm=TRUE)
+```
+
+***The boxplots above show that the range (with and without outliers) and interquartile range of maximum finger-wrist tapping rates are larger for males versus females in this sample. Additionally, the variance (taps$^2$), standard deviations (taps), and interquartile range (tops) of males are all larger than those of the females in the sample. I would conclude that the variance is indeed, NOT equal.***
+
+
+<br>
+**1b)** Suppose now that we wish to *formally test* whether the variance in finger-wrist tapping rate is different between male and female children in this community. Define $\sigma^2_1$ and $\sigma^2_2$, and write the null and alternative hypotheses for the two variances F-test. *(2 points, interpretation)*
+
+***$\sigma^2_1$ is the variance of maximum finger-wrist tapping rates of female children living in this community located near a smelter.***
+
+***$\sigma^2_2$ is the is the variance of maximum finger-wrist tapping rates of male children living in this community located near a smelter.***
+
+***The null hypothesis is $H_0: \frac{\sigma^2_1}{\sigma^2_2} = 1$***
+
+***The alternative hypothesis is $H_A: \frac{\sigma^2_1}{\sigma^2_2} \neq 1$***
+
+<br>
+**1c)** Calculate the p-value for the two variances F-test. Using a significance level of $\alpha=0.05$, do you reject or fail to reject the null hypothesis written in part (b)? *(4 points, code/output and interpretation)*
+
+```{r}
+var.test(maxfwt ~ sex, data=lead, alternative="two.sided", conf.level=.95)
+```
+
+***Since the p-value is 0.003615 and less than the significance level of 0.05, we reject the null hypothesis and conclude that we have sufficient evidence that the variances of maximum finger-wrist tapping rates are not equal for male and female children in this community.***
+
+<br>
+**1d)** Make a conclusion about the F-test in the context of the problem. Using this information, should we assume equal variances in the two-group t-test comparing the mean finger-wrist tapping rate between boys and girls? *(2 points, interpretation)*
+
+***We have sufficient evidence to conclude that the variances of maximum finger-wrist tapping rates for male children are not the same as female children in this community. Thus, we will perform the two-group t-test assuming unequal variances.***
+
+
+<br>
+**Exercise 2:** Researchers are interested in investigating whether the mean HH-Index is different in children who were and were not exposed to lead.
+
+**2a)** Define $\mu_1$ and $\mu_2$, and write down the null and alternative hypotheses. *(2 points, interpretation)*
+
+***$\mu_1$ is the mean HH-Index of children in this community that have not been exposed to lead (control).***
+
+***$\mu_2$ is the mean HH-Index of children in this community that have been exposed to lead.***
+
+***The null hypothesis is $H_0: \mu_1 = \mu_2$***
+
+***The alternative hypothesis is $H_A: \mu_1 \neq \mu_2$***
+
+
+<br>
+**2b)** In order to perform the two-group t-test, the researchers must first determine whether they can assume equal variance of HH-Index in the two lead exposure groups. Use numerical **and** graphical summaries to make an *informal judgment call* about whether the variation in HH-Index among children who were exposed and unexposed to lead in our sample appears to be similar. Note: There is no correct answer to this question since you are asked to make an *informal judgment call*, but you do need to use specific information in the numerical and graphical summaries to support your answer. *(4 points, code/output and interpretation)*
+
+```{r}
+# graphical summary of variance
+boxplot(lead$hh_index ~ lead$Group, data=lead, xlab="Lead Exposure", ylab="Maximum finger-wrist tapping rate", varwidth=TRUE, col='red')
+
+# numerical summary of variance
+tapply(lead$hh_index, lead$Group, var, na.rm=TRUE)
+tapply(lead$hh_index, lead$Group, sd, na.rm=TRUE)
+tapply(lead$hh_index, lead$Group, IQR, na.rm=TRUE)
+
+```
+
+***The boxplot above shows a wider range of HH-Index scores in the control group (no lead exposure) over the group exposed to lead, but both have a similar interquartile range. Numerically, the variance and standard deviation of HH-Index scores are higher for the control group, but the interquartile range is lower for the control group versus the exposed group. Based on the graphical and numerical summaries, I would conclude that the variance is similar, but not equal.***
+
+<br>
+**2c)** Suppose now that we wish to *formally test* whether the variance in HH-Index is different between children in this community who were exposed and unexposed to lead. Define $\sigma^2_1$ and $\sigma^2_2$, and write the null and alternative hypotheses for the two variances F-test. *(2 points, interpretation)*
+
+***$\sigma^2_1$ is the variance of the HH-Index of Social Status of children not exposed to lead (control group) and living in this community located near a smelter.***
+
+***$\sigma^2_2$ is the is the variance of the HH-Index of Social Status of children exposed to lead and living in this community located near a smelter***
+
+***The null hypothesis is $H_0: \frac{\sigma^2_1}{\sigma^2_2} = 1$***
+
+***The alternative hypothesis is $H_A: \frac{\sigma^2_1}{\sigma^2_2} \neq 1$***
+
+
+<br>
+**2d)** Calculate the p-value for the two variances F-test. Using a significance level of $\alpha=0.05$, do you reject or fail to reject the null hypothesis written in part (c)? *(4 points, code/output and interpretation)*
+
+```{r}
+var.test(hh_index ~ Group, data=lead, alternative="two.sided", conf.level=.95)
+```
+
+***Since the p-value of 0.4968 is greater than the significance level of 0.05, we fail to reject the null hypothesis and conclude that there is sufficient evidence to say that the variance of the HH-Index of Social Status is equal for both the control (not exposed) and exposed groups of children in this community.***
+
+<br>
+**2e)** Make a conclusion about the two variances F-test in the context of the problem. Can we assume equal variances in the two-group t-test comparing the mean HH-Index in each group? *(2 points, interpretation)*
+
+***We have sufficient evidence to conclude that the variances of the HH-Index of Social Status for children in this community not exposed versus exposed to lead is equal. Thus, we can perform the two-group t-test assuming equal variances.***
+
+
+<br>
+**2f)** Calculate the p-value for the two-group t-test defined by your hypotheses in part (a). Use the appropriate assumption regarding variances according to your results in parts (b-e). Using a significance level of $\alpha=0.05$, do you reject or fail to reject $H_0$ for the two-group t-test? Make a conclusion about the t-test in the context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+t.test(hh_index ~ Group, data=lead, alternative="two.sided", conf.level=.95, var.equal=TRUE)
+```
+***The p-value for this two-group t-test that assumes equal variance is 0.8551, which is greater than our significance value of 0.05. Therefore, we fail to reject the null hypothesis and conclude that we do not have sufficient evidence to suggest that the HH-Index of Social Status is different in children not exposed to lead versus exposed to lead in this community.***
+
+
+
+<br>
+
+## Part 2: Continuous data - ANOVA, multiple testing (Lecture 5.2)
+
+<br>
+**Exercise 3:** There are 14 universities in the Southeastern Conference (one of which is the University of Kentucky). Researchers are interested in determining whether average GPAs differ at the 14 different schools. To answer this question, they sample 100 students from each school and record the GPA for each student. The researchers perform an ANOVA to test the null hypothesis that the mean GPA is the same at each school against the alternative hypothesis that at least one school has a different average GPA. They find that the p-value is less than 0.05, and they conclude that there is evidence to suggest that at least one school has a different average GPA.
+
+**3a)** Describe the concepts of within-group variation and between-group variation in the context of this problem. Hint: Each of these concepts is the variation in ________ around _________. *(2 points, interpretation)*
+
+***Within-group variation, in the context of this study, refers to the variation of individual student GPAs measured in each sample of 100 students at each of the 14 SEC universities, and the individual measurements relationship with the mean GPA for each university. For example, within-group variation for the University of Kentucky would be described by the variation of the 100 UK student GPAs in comparison to the mean GPA for the 100 UK students.***
+
+***Between-group variation refers to the variation of group means in comparison to the overall mean of all groups. In this study, the between-group variation would refer to the 14 mean GPAs measured for each SEC university and their relationship to the overall mean estimated from all of the samples from the 14 SEC universities.***
+
+
+<br>
+**3b)** Suppose that the researchers want to determine which school or schools have a different average GPA. To do this, they plan to perform a series of two-group t-tests, each testing whether the mean GPAs of two of the schools are the same or different. To test all possible pairings of the 14 schools, they would have to do 91 two-group t-tests. What would be the consequences of failing to adjust for multiple testing? *(2 points, interpretation)*
+
+***This refers to the multiple testing problem, where multiple pairwise comparisons are performed for all combinations of groups involved in the study. Each of these comparisons will use the same significance level, however, the overall significance level for all tests increases above alpha, thus increasing the chance of a type 1 error. In this study, there are 91 simultaneous comparisons being made, and each test has a 5% chance of committing a type 1 error. Thus, there will be 91 chances to make a type 1 error, which gives an overall significance level much higher than 0.05, where the overall significance becomes $\alpha = 1 - 0.95^{91} = 0.991$***
+
+
+<br>
+**3c)** If the researchers use Tukey's adjustment to calculate adjusted p-values for the two-group t-tests, what is the threshold for significance (p-value cutoff) for each test, and what is the actual type 1 error rate of each test? For the actual type 1 error rate, state if it is greater than, less than, or equal to 5%. *(2 points, interpretation)*
+
+***Tukey's adjustment increases the calculated p-value making it harder to reach statistical significance (not as many type 1 errors) and ensures that the overall probability of committing a type 1 error remains at the given significance level of the study. Using the Tukey method in this study, p-values would be calculated for each of the 91 comparisons and then the p-values would be adjusted by the Tukey method, increasing their value. The threshold for determining signficance for each test would remain the same (signficance level of the study, $\alpha$), and the actual type 1 error rate of each test would decrease, ensuring that the OVERALL significance level remained at $\alpha = 0.05$.***
+
+
+<br>
+**Exercise 4:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. If you have not done so already, import the lead.xlsx dataset.
+
+Researchers are interested in investigating whether the mean dominant hand finger-wrist tapping rate is different in children in this community who are currently exposed, previously exposed, or never exposed to lead. These exposure categories are defined by the *lead_grp* variable.
+
+**4a)** Define $\mu_1$, $\mu_2$, and $\mu_3$, and write the null and alternative hypotheses for the ANOVA. *(2 points, interpretation)*
+
+***$\mu_1$ is the mean dominant hand finger-wrist tapping rate for children in the community currently exposed to lead.***
+
+***$\mu_2$ is the mean dominant hand finger-wrist tapping rate for children in the community not exposed to lead.***
+
+***$\mu_3$ is the mean dominant hand finger-wrist tapping rate for children in the community previously exposed to lead.***
+
+***The null hypothesis is $H_0: \mu_1 = \mu_2 = \mu3$***
+
+***The alternative hypothesis is $H_A:$ at least one of mean dominant hand finger-wrist tapping rate for the three groups of children in this community is different***
+
+
+<br>
+**4b)** What are our best numerical estimates of $\mu_1$, $\mu_2$, and $\mu_3$? *(4 points, code/output and interpretation)*
+
+```{r}
+tapply(lead$maxfwt, lead$lead_grp, mean, na.rm=TRUE)
+```
+
+***The best estimates for $\mu_1, \mu_2, and \mu_3$ are given by the sample means for each of the groups, where $\mu_1$ = 44 taps, $\mu_2$ = 54.4 taps, and $\mu_3$ = 51.5 taps.***
+
+
+<br>
+**4c)** Perform the ANOVA test using a $\alpha=0.05$ significance level. Report the p-value, make a rejection decision, and state a conclusion about the ANOVA in the context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+maxfwt_anova <- aov(lead$maxfwt ~ lead$lead_grp, data=lead)
+summary(maxfwt_anova)
+```
+
+***The p-value for this one-way ANOVA 0.00669, which is below the given significance level of 0.05. Therefore we reject the null hypothesis and conclude that we have sufficient evidence that the maximum finger-wrist tapping rate is different in at least one of the lead exposure groups (currently exposed, not exposed, previously exposed).*** 
+
+
+<br>
+**4d)** We want to go on and say which lead exposure groups appear to have a different mean finger-wrist tapping rate from the others. Write three sets of null and alternative hypotheses, one for each of the two-group t-tests comparing the mean finger-wrist tapping rate in each pair of lead exposure groups. *(2 points, interpretation)*
+
+***Further work to determine which lead exposure groups appear to have a different mean maximum finger-wrist tapping rate will involve three two-group t-tests.***
+
+***Test 1 - $H_0: \mu_1 = \mu_2$  &   $H_A: \mu_1 \neq \mu_2$***
+
+***Test 2 - $H_0: \mu_1 = \mu_3$  &   $H_A: \mu_1 \neq \mu_3$***
+
+***Test 3 - $H_0: \mu_2 = \mu_3$  &   $H_A: \mu_2 \neq \mu_3$***
+
+
+<br>
+**4e)** What are the Tukey-adjusted p-values for each of the three pairwise tests? *(4 points, code/output and interpretation)*
+
+```{r}
+TukeyHSD(maxfwt_anova)
+```
+
+***The Tukey adjusted p-values for the three two-group t-tests are 0.00457397 for test 1 (currently exposed-not exposed), 0.1766349 for test 2 (currently exposed-previously exposed), and 0.6707313 for test 3 (not exposed-previously exposed).***
+
+
+<br>
+**4f)** Make a conclusion in context of the problem for each of the three pairwise tests. (You should have three different hypothesis test conclusion statements.) *(2 points, interpretation)*
+
+***With a family-wise signficance level of 0.05 and using the Tukey adjustment, the p-value for test 1 is below the significance level and we reject the null hypothesis. We conclude that there is sufficient evidence that the mean finger-wrist tapping rate of the dominant hand in the currently exposed group is different than the group not exposed to lead.***
+
+***The p-value for test 2 is also above the significance level of 0.05, and we fail to reject the null hypothesis. We conclude that there is not sufficient evidence that the finger-wrist tapping rates in the dominant hand of the currently exposed group is not significantly different than the group previously exposed to lead.***
+
+***Finally, the p-value for test 3 is above the significance level of 0.05, and we fail to reject the null hypothesis. We conclude that there is not sufficient evidence that the finger-wrist tapping rates in the dominant hand of the group not exposed to lead is not significantly different than the group previously exposed to lead.***
+
+
+<br>
+**Exercise 5:** Researchers are interested in investigating whether the mean full-scale IQ score is different in children in this community who are currently exposed, previously exposed, or never exposed to lead. These exposure categories are defined by the *lead_grp* variable.
+
+**5a)** Define $\mu_1$, $\mu_2$, and $\mu_3$, and write the null and alternative hypotheses for the ANOVA. *(2 points, interpretation)*
+
+***$\mu_1$ is the mean full-scale IQ score for children in the community currently exposed to lead.***
+
+***$\mu_2$ is the mean full-scale IQ score for children in the community not exposed to lead.***
+
+***$\mu_3$ is the mean full-scale IQ score for children in the community previously exposed to lead.***
+
+***The null hypothesis is $H_0: \mu_1 = \mu_2 = \mu3$***
+
+***The alternative hypothesis is $H_A:$ at least one of mean full-scale IQ scores of the three lead exposure groups of children in this community is different***
+
+
+<br>
+**5b)** Perform the ANOVA test using a $\alpha=0.05$ significance level. Report the p-value, make a rejection decision, and state a conclusion about the ANOVA in the context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+full.iq_anova <- aov(lead$iqf ~ lead$lead_grp, data=lead)
+summary(full.iq_anova)
+```
+
+***The p-value for this one-way ANOVA test is 0.181, which is higher than the significance level of 0.05 and we fail to reject the null hypothesis. We conclude that there is not sufficient evidence to suggest that mean full-scale IQ scores are signficantly different in any of the three lead exposure groups (currently exposed, not exposed, previously exposed) of children in this community.***
+
+
+<br>
+**5c)** Is it appropriate to go on and perform all pairwise tests looking for a difference in mean full-scale IQ score between each pair of lead exposure groups? Why or why not? *(2 points, interpretation)*
+
+***The one-way ANOVA test for this research question showed that there is no evidence of signficant differences of mean full-scale IQ scores of any lead exposure group of children in this community. Two-group t-tests for the three possible combinations using the same significance level of $\alpha$ = 0.05 would not show any significance, and therefore it is not appropriate to do more work for the same results.***
+
+
+<br>

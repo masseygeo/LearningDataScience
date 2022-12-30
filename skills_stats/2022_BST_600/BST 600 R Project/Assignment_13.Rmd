@@ -1,0 +1,439 @@
+---
+title: "BST 600 Assignment 13"
+subtitle: |
+    | Part 1: Binary data - 2 group estimation
+    | Part 2: Binary data - 2 group testing, power, and sample size
+author: "Matt Massey"
+date: "`r Sys.Date()`"
+output: html_notebook
+---
+
+<br>
+<font size="3">
+*Due: Monday, November 21, 9:00am*
+<br>
+*Total Points = 78*
+</font>
+<br><br>
+
+
+**Directions:** Open this file in RStudio. Complete each exercise in the assignment, and be sure to run any code that you write. Click "Preview" to view the .html report as you go. When you're finished, submit the .html report on Canvas. Remember, all R code you need to complete this assignment can be found in the "BST 600 R Code" document.
+
+Exercises denoted with *(4 points, code/output and interpretation)* require both R code/output and a written explanation/interpretation of the output in your own words, using complete sentences. Exercises denoted with *(2 points, code/output)* require just R code/output, and exercises denoted with *(2 points, interpretation)* require just a written answer.
+
+
+<br>
+
+## Part 1: Binary data - 2 group estimation (Lecture 13.1)
+
+<br>
+
+**Quick R Lesson:** All of the functions that we have used in BST 600 so far come with the base configuration of R. However, there are many, many more functions that are contained in external "packages" that can be installed in R, or users can also define their own functions to execute various mathematical/statistical procedures that are not contained in the base configuration. 
+
+The block of code below initializes new functions for computing risk differences, risk ratios, and odds ratios, that are not contained in the base configuration of R. Run the block of R code below to initialize the functions. You will not see any output when you run the code, but you will see in the "Environment" box in the upper right corner of RStudio that there are functions listed called *risk_diff*, *risk_ratio*, and *odds_ratio*.
+
+
+<!-- RUN THIS BLOCK OF R CODE BEFORE MOVING ON -->
+```{r include=FALSE}
+risk_diff <- function(tab, conf.level=.95){
+  phat1 <- tab[1,1]/(tab[1,1]+tab[1,2])
+  phat2 <- tab[2,1]/(tab[2,1]+tab[2,2])
+  RD <- phat1 - phat2
+  lowerBound <- RD - qnorm(1-(1-conf.level)/2) * sqrt(((phat1*(1-phat1))/(tab[1,1]+tab[1,2])) + ((phat2*(1-phat2))/(tab[2,1]+tab[2,2])))
+  upperBound <- RD + qnorm(1-(1-conf.level)/2) * sqrt(((phat1*(1-phat1))/(tab[1,1]+tab[1,2])) + ((phat2*(1-phat2))/(tab[2,1]+tab[2,2])))
+  output <- c(RD, lowerBound, upperBound)
+  names(output) <- c("risk difference", "RD CI lower", "RD CI upper")
+  print(output)
+}
+
+risk_ratio <- function(tab, conf.level=.95){
+  phat1 <- tab[1,1]/(tab[1,1]+tab[1,2])
+  phat2 <- tab[2,1]/(tab[2,1]+tab[2,2])
+  RR <- phat1/phat2
+  lowerBound <- exp(log(RR) - qnorm(1-(1-conf.level)/2) * sqrt((tab[1,2] / (tab[1,1]*(tab[1,1]+tab[1,2]))) + (tab[2,2]/(tab[2,1]*(tab[2,1]+tab[2,2])))))
+  upperBound <- exp(log(RR) + qnorm(1-(1-conf.level)/2) * sqrt((tab[1,2] / (tab[1,1]*(tab[1,1]+tab[1,2]))) + (tab[2,2]/(tab[2,1]*(tab[2,1]+tab[2,2])))))
+  output <- c(RR, lowerBound, upperBound)
+  names(output) <- c("risk ratio", "RR CI lower", "RR CI upper")
+  print(output)
+}
+
+odds_ratio <- function(tab, conf.level=.95){
+  phat1 <- tab[1,1]/(tab[1,1]+tab[1,2])
+  phat2 <- tab[2,1]/(tab[2,1]+tab[2,2])
+  OR <- (phat1/(1-phat1))/(phat2/(1-phat2))
+  lowerBound <- exp(log(OR) - qnorm(1-(1-conf.level)/2) * sqrt((1/tab[1,1]) + (1/tab[1,2]) + (1/tab[2,1]) + (1/tab[2,2])))
+  upperBound <- exp(log(OR) + qnorm(1-(1-conf.level)/2) * sqrt((1/tab[1,1]) + (1/tab[1,2]) + (1/tab[2,1]) + (1/tab[2,2])))
+  output <- c(OR, lowerBound, upperBound)
+  names(output) <- c("odds ratio", "OR CI lower", "OR CI upper")
+  print(output)
+}
+```
+
+
+<br>
+**Exercise 1:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. To get started, import the lead.xlsx dataset.
+
+```{r}
+library(readxl)
+lead<-read_excel('lead.xlsx', col_names=TRUE, na="")
+```
+
+
+We are interested in comparing the probability of lead exposure (Exposed vs. Control) among children who lived near the smelter in their first two years of life and among children who did not live near the smelter during their first two years of life.
+
+**1a)** Identify the exposure variable and outcome variable in this analysis. *(2 points, interpretation)*
+
+***The exposure variable here are the children who did and did not live near the smelter in their first two years of life.***
+
+***The outcome variable here is the lead exposure status (Exposed vs. Control) of the children in the community.***
+
+
+<br>
+**1b)** Suppose that "Group 1" is those who lived near the smelter during their first two years of life and "Group 2" is those who did not live near the smelter during their first two years of life. Make a 2x2 frequency table for the indicator for living near the smelter in the first two years of life and lead exposure group. Your 2x2 table should have these 3 features:
+
+1. The exposure variable is in the rows and the outcome variable is in the columns of the table.
+2. "Group 1" is in the first row of the table, and "Group 2" is in the second row of the table.
+3. The category of interest for the outcome variable is listed as the first column. 
+
+Hint: You may need to reorder the categories in your two variables of interest to satisfy 1, 2, and 3. *(2 points, code/output)*
+
+```{r}
+# check order of 2x2 table
+xtabs(~fst2yrs+Group, data=lead)
+```
+
+
+```{r}
+# change order of outcome variable
+lead$Group <- factor(lead$Group, levels=c('Exposed', 'Control'))
+# change order of exposure variable
+lead$fst2yrs <- factor(lead$fst2yrs, levels=c('Yes', 'No'))
+# check order new 2x2 table
+xtabs(~fst2yrs+Group, data=lead)
+```
+
+
+<br>
+**1c)** Suppose that $\hat{p}_1$ is the probability of lead exposure among children who lived near the smelter during their first two years of life, and $\hat{p}_2$ is the probability of lead exposure among children who did not live near the smelter during their first two years of life. Calculate $\hat{p}_1$ and $\hat{p}_2$ using R code (by computing row percentages in the 2x2 table), and also show how these conditional probabilities are calculated by hand (write simple equations using counts from the table in (b)). *(4 points, computation and interpretation)*
+
+```{r}
+# calculate row percentages
+proportions(xtabs(~ fst2yrs + Group, data=lead), margin=1)
+```
+$\hat{p}_1 = \frac{17}{17+18} = 0.4857143$
+
+$\hat{p}_2 = \frac{29}{29+60} = 0.3258427$
+
+
+<br>
+**1d)** The risk difference comparing the probability of lead exposure among those who did and did not live near the smelter during their first two years of life is defined as $\hat{p}_1 - \hat{p}_2$. Use the *risk_diff* function in R to calculate the risk difference, and show that it does, in fact, equal $\hat{p}_1 - \hat{p}_2$ based on the calculations of $\hat{p}_1$ and $\hat{p}_2$ in (c). Interpret the risk difference in the context of the problem. *(4 points, computation and interpretation)*
+
+```{r}
+# calculate risk difference
+risk_diff(table(lead$fst2yrs, lead$Group))
+```
+$RD = \hat{p}_1-\hat{p}_2 = 0.4857143-0.3258427 = 0.15987159$
+
+***The difference in probability of lead exposure between children who did and did not live near the smelter in their first two years of life (Yes-No) is 0.15987159 (15.99%).***
+
+<br>
+**1e)** The risk ratio comparing the probability of lead exposure among those who did and did not live near the smelter during their first two years of life is defined as $\hat{p}_1 / \hat{p}_2$. Use the *risk_ratio* function in R to calculate the risk ratio, and show that it does, in fact, equal $\hat{p}_1 / \hat{p}_2$ based on the calculations of $\hat{p}_1$ and $\hat{p}_2$ in (c). Interpret the risk ratio in the context of the problem. *(4 points, computation and interpretation)*
+
+```{r}
+# calculate risk ratio
+risk_ratio(table(lead$fst2yrs, lead$Group))
+```
+$RR = \frac{\hat{p}_1}{\hat{p}_2} = \frac{0.4857143}{0.3258427} = 1.4906404$
+
+***The percentage of lead exposure in children who lived near the smelter in their first two years of life is 1.49 times larger than the percentage of lead exposure in children who did not live near the smelter in their first two years of life.***
+
+
+
+<br>
+**1f)** Calculate the odds of lead exposure among children who lived near the smelter in their first two years of life as well as the odds of lead exposure among children who did not live near the smelter during their first two years of life (using equations, no R code required). *(2 points, computation)*
+
+***The odds of lead exposure among children who lived near the smelter in their first two years of life is given by:***
+
+$\frac{\hat{p}_1}{1-\hat{p}_1} = \frac{0.4857143}{1-0.4857143} = 0.9444445$
+
+***The odds of lead exposure among children who did not live near the smelter in their first two years of life is given by:***
+
+$\frac{\hat{p}_2}{1-\hat{p}_2} = \frac{0.3258427}{1-0.3258427} = 0.4833333$
+
+<br>
+**1g)** Use the *odds_ratio* function in R to calculate the odds ratio comparing the odds of lead exposure among those who did and did not live near the smelter during their first two years of life. Show that it does, in fact, equal the ratio of the two odds measures that you calculated in (f), and interpret the odds ratio in the context of the problem. *(4 points, computation and interpretation)*
+
+```{r}
+# calculate odds ratio
+odds_ratio(table(lead$fst2yrs, lead$Group))
+```
+$OR = \frac{\frac{\hat{p}_1}{1-\hat{p}_1}}{\frac{\hat{p}_2}{1-\hat{p}_2}} = \frac{0.9444445}{0.4833333} = 1.9540230$
+
+***The odds of lead exposure in children who lived near the smelter in their first two years of life is 1.95 times greater than the odds of lead exposure in children who did not live near the smelter in their first two years of life.***
+
+<br>
+**1h)** Using the R output from (d), (e), and (g), report 95% confidence intervals for the risk difference, risk ratio, and odds ratio. When the significance level is $\alpha=0.05$, is there a significant difference in the probability of lead exposure among those who did and did not live near the smelter during their first two years of life? Justify your answer using the confidence intervals. *(4 points, numerical answer and interpretation)*
+
+***The 95% confidence interval for the risk difference is between -0.03221708 and 0.35196026.***
+
+***The 95% confidence interval for the risk ratio is between 0.9473085 and 2.3456022.***
+
+***The 95% confidence interval for the odds ratio is between 0.8802715 and 4.3375319.***
+
+***Since the 95% CI for the risk difference includes 0 and the 95% CI's for the risk ratio and odds ratio both include 1, there is not sufficient evidence to say that the probability lead exposure is significantly different (at signficance level of $\alpha=0.05$) for those who did and did not live near the smelter in their first two years of life.***
+
+
+
+<br>
+**Exercise 2:** We are interested in comparing the probability of having a high finger-wrist tapping rate among children exposed and unexposed to lead.
+
+**2a)** Create an indicator variable called *maxfwt_high* that is equal to 1 when the dominant hand finger-wrist tapping rate (*maxfwt*) is greater than or equal to 50 taps per minute, and equal to 0 when the dominant hand finger-wrist tapping rate (*maxfwt*) is less than 50 taps per minute. Set "1" as the reference category or category of interest for this variable. Hint: To check that you have done this correctly, use the *table* command to print frequencies for the *maxfwt_high* variable. You should see the '1' category listed first with n=62 subjects and the '0' category listed second with n=37 subjects. *(2 points, code)*
+
+```{r}
+# create new indicator variable; 1 for maxfwt >= 50 taps
+lead$maxfwt_high <- as.factor((lead$maxfwt >= 50)*1)
+# check order of 2x2 table with new variable
+xtabs(~Group+maxfwt_high, data=lead)
+```
+
+
+```{r}
+# change order of maxfwt_high variable
+lead$maxfwt_high <- factor(lead$maxfwt_high, levels=c(1, 0))
+# check order of table with reordered indicator variable
+xtabs(~Group+maxfwt_high, data=lead)
+```
+
+
+
+<br>
+**2b)** Identify the exposure variable and outcome variable in this analysis. *(2 points, interpretation)*
+
+***The exposure variable is lead exposure of children in the community (those exposed to lead and those who were not exposed to lead).***
+
+***The outcome variable is dominant hand finger-wrist tapping rate of children in the community, split by low ($<50$ taps) and high ($\ge50$ taps) dominant hand finger-wrist tapping rates.***
+
+
+<br>
+**2c)** Suppose that "Group 1" is children exposed to lead, and "Group 2" is children unexposed to lead. Make a 2x2 frequency table for lead exposure group and high/low finger-wrist tapping rate. Your 2x2 table should have these 3 features:
+
+1. The exposure variable is in the rows and the outcome variable is in the columns of the table.
+2. "Group 1" is in the first row of the table, and "Group 2" is in the second row of the table.
+3. The category of interest for the outcome variable is listed as the first column. 
+
+Hint: You may need to reorder the categories in your two variables of interest to satisfy 1, 2, and 3. *(2 points, code/output)*
+
+```{r}
+# check table set up; modified in 2a
+xtabs(~Group+maxfwt_high, data=lead)
+```
+
+
+<br>
+**2d)** Calculate the risk difference, risk ratio, and odds ratio comparing the probability of having a high finger-wrist tapping rate among those exposed and unexposed to lead. You do not need to show your work for the calculations. Interpret the three quantities in context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+# risk difference
+risk_diff(table(lead$Group, lead$maxfwt_high))
+
+# risk ratio
+risk_ratio(table(lead$Group, lead$maxfwt_high))
+
+# odds ratio
+odds_ratio(table(lead$Group, lead$maxfwt_high))
+```
+***The difference in probability of having a high dominant-hand finger-wrist tapping rate between children who were and were not exposed to lead (Exposed-Control) is -0.26160714 or -26.16%.***
+
+***The percentage of high dominant-hand finger-wrist tapping rates in children who were exposed to lead is 0.6360248 times the percentage of high dominant-hand finger-wrist tapping rates in children not exposed to lead.***
+
+***The odds of high dominant-hand finger-wrist tapping rates in children who were exposed to lead is 0.3295195 times the odds of high dominant-hand finger-wrist tapping rates in children not exposed to lead.***
+
+
+<br>
+**2e)** Using the output in (d), report 95% confidence intervals for the risk difference, risk ratio, and odds ratio. When the significance level is $\alpha=0.05$, is there a significant difference in the probability of having a higher finger-wrist tapping rate among those exposed and unexposed to lead? Justify your answer using the confidence intervals. *(4 points, numerical answer and interpretation)*
+
+***The 95% confidence interval for the risk difference is between -0.46002819 and -0.06318609.***
+
+***The 95% confidence interval for the risk ratio is between 0.4296778 and 0.9414673.***
+
+***The 95% confidence interval for the odds ratio is between 0.1394728 and 0.7785252.***
+
+***Since the 95% CI for the risk difference does not include 0 and the 95% CI's for the risk ratio and odds ratio both do not include 1, there is sufficient evidence to say that the probability of a high dominant hand finger-wrist tapping rate ($\ge50$ taps) is significantly different in children exposed to lead versus children not exposed to lead, at the $\alpha=0.05$ significance level.***
+
+
+
+
+<br>
+
+## Part 2: Binary data - 2 group testing, power, and sample size (Lecture 13.2)
+
+<br>
+**Exercise 3:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. If you have not done so already, import the lead.xlsx dataset.
+
+Researchers are interested in examining whether the probability of lead exposure is different among children in the community who did and did not live near the smelter during their first two years of life. We will use both the $\chi^2$ test and Fisher's exact test to answer this question.
+
+**3a)** Define $p_1$ and $p_2$, and state the null and alternative hypotheses that apply to both the $\chi^2$ test and Fisher's exact test. *(2 points, interpretation)*
+
+***Let $p_1$ be the probability of lead exposure among children who did live near the smelter during their first two years of life.***
+
+***Let $p_2$ be the probability of lead exposure among children who did not live near the smelter during their first two years of life.***
+
+***The null hypothesis is $H_0: p_1=p_2$***
+
+***The alternative hypothesis is $H_A: p_1\neq_2$***
+
+
+<br>
+**3b)** Check whether the $\chi^2$ test is valid for this analysis. *(4 points, code/output and interpretation)*
+
+```{r}
+# check expected cell counts and table set up
+with(lead, chisq.test(fst2yrs, Group))$expected
+```
+***All expected cell counts are greater than 5, so the $\chi^2$ test is valid.***
+
+
+<br>
+**3c)** Perform the $\chi^2$ test. Be sure to report the p-value and make a conclusion in context of the problem. Hint: Read and follow the notes for this test in the "BST 600 R Code" document to ensure that the test is being performed according to the category of interest in the outcome variable. *(4 points, code/output and interpretation)*
+
+```{r}
+# chi squared test for probability of lead exposure between children who did and did not live near the smelter during their first two years of life
+chisq.test(lead$fst2yrs, lead$Group)
+```
+***The p-value is 0.1464 for the $\chi^2$ test. Since the p-value is greater than a significance level of $\alpha=0.05$, we fail to reject the null hypothesis and conclude that there is not sufficient evidence to suggest that the probability of lead exposure is different among children who did and did not live near the smelter in their first two years of life.***
+
+
+<br>
+**3d)** Perform the Fisher's exact test. Be sure to report the p-value and make a conclusion in context of the problem. Hint: Read and follow the notes for this test in the "BST 600 R Code" document to ensure that the test is being performed according to the category of interest in the outcome variable. *(4 points, code/output and interpretation)*
+
+```{r}
+# fishers exact test for same hypothesis test as above
+fisher.test(lead$fst2yrs, lead$Group)
+```
+***The p-value is 0.1042 for the fisher's exact test. Since the p-value is greater than a significance level of $\alpha=0.05$, we fail to reject the null hypothesis and conclude that there is not sufficient evidence to suggest that the probability of lead exposure is different among children who did and did not live near the smelter in their first two years of life.***
+
+
+<br>
+**3e)** Does it matter whether we use the $\chi^2$ test or Fisher's exact test to answer this research question? Why or why not? *(2 points, interpretation)*
+
+***The researchers are interested in determining if there is a difference in the probability of lead exposure between children who did and did not live near the smelter during their first two years of life. To answer this question, both hypothesis tests are valid - the $\chi^2$ test has all exepected cell values greater than 5, and the fisher's exact test is always valid. Both tests give the same conclusion that there is not sufficient evidence to suggest that lead exposure is different among children who did and did not live near the smelter in their first two years of life.***
+
+
+<br>
+**Exercise 4:** Suppose that our lead exposure study is being used as pilot data to plan a new, larger study. 
+
+**4a)** In our pilot study, among the 46 children who are exposed to lead, 19 have a high performance IQ score. Among the 78 children who are unexposed to lead, 45 have a high performance IQ score. How many subjects would we need to recruit in the new study in order to have 80% power to detect a difference in the probability of having a high performance IQ score between children exposed and unexposed to lead (using $\alpha=0.05$)? *(4 points, code/output and interpretation)*
+
+```{r}
+# create new indicator variable for high performance iq
+lead$iqp_high <- as.factor((lead$iqp >= 100)*1)
+# check table set up
+xtabs(~Group+iqp_high, data=lead)
+```
+
+```{r}
+# change order of iqp_high variable
+lead$iqp_high <- factor(lead$iqp_high, levels=c(1,0))
+# check new table set up
+xtabs(~Group+iqp_high, data=lead)
+```
+
+```{r}
+# calculate row proportions/percentages
+proportions(xtabs(~Group+iqp_high, data=lead), margin=1)
+```
+
+```{r}
+# calculate subjects needed for desired power of 80%
+power.prop.test(n=NULL, p1=0.4130435, p2=0.5769231, power=0.8, sig.level=.05, alternative="two.sided")
+```
+
+***The researchers would need a total of 290 subjects (145 subjects exposed to lead, 145 subjects not exposed to lead) to have 80% power of detecting a difference in the probability of high performance IQ scores among children exposed and not exposed to lead.***
+
+
+<br>
+**4b)** Suppose that the new study plans to recruit 200 subjects who lived near the smelter in their first two years of life and 200 subjects who did not live near the smelter in their first two years of life. What power would it have to detect a difference in the probability of lead exposure between children who did and did not live near the smelter during their first two years of life (using $\alpha=0.05$)? Hint: You need to calculate some quantities from the lead dataset to use as pilot estimates for this calculation. *(4 points, code/output and interpretation)*
+
+```{r}
+# check table set up
+xtabs(~fst2yrs+Group,data=lead)
+```
+
+```{r}
+# calculate row proportions
+proportions(xtabs(~fst2yrs+Group, data=lead), margin=1)
+```
+
+
+```{r}
+# calculate power given 200 subjects in each group
+power.prop.test(n=200, p1=0.4857143, p2=0.3258427, power=NULL, sig.level=.05, alternative="two.sided")
+```
+
+***The new study using a total of 400 subjects (200 children who lived near the smelter in their first two years of life and 200 children who did not) would have 90.55% power to detect a difference in the probability of lead exposure between children who did and did not live near the smelter during their first two years of life.***
+
+
+<br>
+**Exercise 5:** We are interested in comparing the probability of having a high verbal IQ score among children currently exposed to lead, previously exposed to lead, and not exposed to lead. This 3-category lead exposure group is recorded in the *lead_grp* variable.
+
+**5a)** Create an indicator variable called *iqv_high* that is equal to 1 when the verbal IQ score (*iqv*) is greater than or equal to 100 points, and equal to 0 when the verbal IQ score (*iqv*) is less than 100 points. Set "1" as the reference category or category of interest for this variable. Hint: To check that you have done this correctly, use the *table* command to print frequencies for the *iqv_high* variable. You should see the '1' category listed first with n=14 subjects and the '0' category listed second with n=110 subjects. (*2 points, code*)
+
+```{r}
+# create new high verbal iq indicator variable
+lead$iqv_high <- as.factor((lead$iqv >= 100)*1)
+# check table set up
+xtabs(~lead_grp+iqv_high, data=lead)
+```
+
+```{r}
+# change order of iqv_high variable
+lead$iqv_high <- factor(lead$iqv_high, levels=c(1,0))
+# check table set up
+xtabs(~lead_grp+iqv_high, data=lead)
+```
+
+
+<br>
+**5b)** Define $p_1$, $p_2$, and $p_3$, and state the null and alternative hypotheses that apply to both the $\chi^2$ test and Fisher's exact test for this research question. *(2 points, interpretation)*
+
+***Let $p_1$ be the probability of having a high verbal IQ score among children that are currently exposed to lead.*** 
+
+***Let $p_2$ be the probability of having a high verbal IQ score among children that are not exposed to lead.*** 
+
+***Let $p_3$ be the probability of having a high verbal IQ score among children that were previously exposed to lead.*** 
+
+***The null hypothesis is $H_0: p_1=p_2=p_3$***
+
+***The alternative hypothesis is $H_A$: at least one proportion is different from the others***
+
+
+<br>
+**5c)** Check whether the $\chi^2$ test is valid for this analysis. *(4 points, code/output and interpretation)*
+
+```{r}
+# check expected cell values for chi squared test
+with(lead, chisq.test(lead_grp, iqv_high))$expected
+```
+
+***Two out of the six (33.3%) expected cells less than five, so the $\chi^2$ test is not appropriate.***
+
+
+<br>
+**5d)** Perform an appropriate hypothesis test to answer this research question. Be sure to report the p-value and make a conclusion in context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+# use fishers exact hypothesis test
+fisher.test(lead$lead_grp, lead$iqv_high)
+```
+
+***The p-value is 0.9216 for the fisher's exact test. Since the p-value is greater than a significance level of $\alpha=0.05$, we fail to reject the null hypothesis and conclude that there is not sufficient evidence to suggest that the probability of having a high verbal IQ score is different among children currently exposed to lead, never exposed to lead, or previously exposed to lead.***
+
+
+<br>
+**5e)** Does it matter whether we use the $\chi^2$ test or Fisher's exact test to answer this research question? Why or why not? *(2 points, interpretation)*
+
+***The $\chi^2$ test is not appropriate in this case because 33.3% of the cell values are less than 5. For this study, only Fisher's exact test is appropriate, which concludes that there is not sufficient evidence to suggest that the probability of having a high verbal IQ score is different among children currently exposed to lead, never exposed to lead, or previously exposed to lead.***
+
+
+
+<br>

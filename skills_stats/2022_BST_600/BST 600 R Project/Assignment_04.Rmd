@@ -1,0 +1,336 @@
+---
+title: "BST 600 Assignment 4"
+author: "Matt Massey"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+subtitle: "| Part 1: Continuous data - 1 group power and sample size\n| Part 2: Continuous
+  data - 2 group estimation, testing, power, and sample size\n"
+---
+
+<br>
+<font size="3">
+*Due: Monday, September 19, 9:00am*
+<br>
+*Total Points = 80*
+</font>
+<br><br>
+
+
+**Directions:** Open this file in RStudio. Complete each exercise in the assignment, and be sure to run any code that you write. Click "Preview" to view the .html report as you go. When you're finished, submit the .html report on Canvas. Remember, all R code you need to complete this assignment can be found in the "BST 600 R Code" document.
+
+Exercises denoted with *(4 points, code/output and interpretation)* require both R code/output and a written explanation/interpretation of the output in your own words, using complete sentences. Exercises denoted with *(2 points, code/output)* require just R code/output, and exercises denoted with *(2 points, interpretation)* require just a written answer.
+
+
+<br>
+
+## Part 1: Continuous data - 1 group power and sample size (Lecture 4.1)
+
+<br>
+**Exercise 1:** Researchers are interested in testing whether the mean systolic blood pressure in adults five years after experiencing a myocardial infarction is equal to 120 mmHg. To answer this question, they will recruit a sample of adults five years after experiencing a myocardial infarction, measure their systolic blood pressure, and perform a hypothesis test. The researchers want to perform the test at a 0.01 significance level, and they want the probability of rejecting the null hypothesis if the mean systolic blood pressure really is not 120 mmHg to be 85%. With these specifications, they calculate that they will need to sample 48 subjects to achieve this goal.
+
+**1a)** What is the type 1 error rate of the test? Give the number and explain what it means in the context of the problem. *(2 points, interpretation)*
+
+***A Type 1 error is rejection of a null hypothesis when the hull hypothesis is actually true. A type 1 error in this study would require the rejection of the null hypothesis that the mean systolic blood pressure in adults five years after experiencing a myocardial infarction is equal to 120 mmHG, when it actually is 120 mmHG. The probability of a Type 1 error in this study is given by the significance level of $\alpha$=0.01.***
+
+
+<br>
+**1b)** What is the power of the test? Give the number and explain what it means in the context of the problem. *(2 points, interpretation)*
+
+***Power refers to the probability of rejecting the null hypothesis given that the null hypothesis is really false. In the context of this study, power is the probability of rejecting the hypothesis that the mean systolic blood pressure in adults five years after experiencing a myocardial infarction is equal to 120 mmHG, when, indeed, it actually is significantly different than 120 mmHG. The power is given to be 0.85.***
+
+
+<br>
+**1c)** What is the type 2 error rate of the test? Give the number and explain what it means in the context of the problem. *(2 points, interpretation)*
+
+***A Type 2 error refers to the probability of failing to reject a null hypothesis even though it is actually false. It is related to power by the equation: power=1-$\beta$, where $\beta$ is the probability of type 2 errors. In the context of this study, the type 2 error probability is 0.15 because the power is given to be 0.85 ($\beta$ = 1 - 0.85 = 0.15). In other words, the study has a 15% chance of NOT finding any significant difference between the mean systolic blood pressure of 120 mmHg in adults five years after experiencing a myocardial infarction even though there really is a difference.***
+
+
+
+<br>
+**Exercise 2:** In a sample of 100 subjects, the mean body mass index (BMI) is 25.0 kg/m$^2$ (SD=5.5 kg/m$^2$). The sample is used to test the hypothesis that the BMI in the population is equal to 23.0 kg/m$^2$ at the $\alpha=0.05$ level. The power of the test to detect a difference is about 95%.
+
+**2a)** What would happen to the power of the test if the sample size was increased? Explain. *(2 points, interpretation)*
+
+***If the sample size was increased in this study of determining mean body mass index of the population of interest, the power of the study would increase. In other words, there would be a greater probability of finding a significant difference between the sample mean of 25 kg/m$^2$ and the null hypothesis that BMI is 23 kg/m$^2$. The power is increased because we would have more data with the larger sample size.***
+
+<br>
+**2b)** What would happen to the power of the test if the variability of observations in the sample was larger? Explain. *(2 points, interpretation)*
+
+***Variability of the sample can be measured with standard deviation or variance, and inversely affects power. A higher variability leads to lower power, or lower variability leads to higher power. In this study, if the variability of the sample mean of BMI was increased (greater than SD=5.5 kg/m$^2), the power would decrease (less than 0.95) and the study would could not detect a difference at a rate of at least 95%.***
+
+
+<br>
+**2c)** What would happen to the power of the test if we increased the significance level to $\alpha=0.10$? Explain. *(2 points, interpretation)*
+
+***Significance level is related to power in that a decreased significance level would lead to more stringent requirements (effectively creating a wider confidence interval) for significance and therefore would reduce power. In contrast, increasing the significance level would narrow the range of significant values (decreasing width of confidence interval) and increase power. In this study, if the significance level were increased to $\alpha=0.10$, the study would have a higher probability of finding evidence for a significant difference in the sample mean BMI of 25 kg/m$^2$ and the null hypothesis BMI of 23.0 kg/m$^2$.***
+
+
+<br>
+**2d)** What would happen to the power of the test if you wanted to be able to detect a difference of 3 kg/m$^2$? Explain. *(2 points, interpretation)*
+
+***Detecting a difference of 3 kg/m$^2$ refers to the effect size ($\delta$) - the difference between the hypothesized mean and the actual sample mean. The effect size is related to power in that a higher effect size increases the power (easier to find a significant difference from the null). In contrast, decreasing the effect size decreases the power because the sample mean and null are more similar. In this study, the given effect size is 2 kg/m$^2$ (sample mean of 25 kg/m$^2$ and null of 23 kg/m$^2$. If we increase the effect size to 3 kg/m$^2$, then the power increases as well because there is a greater difference between the sample mean and null.***
+
+
+<br>
+**Exercise 3:** Researchers wish to test whether the mean height of seven-year-old American children is equal to 47.7 inches. They will collect a sample of American seven-year-olds and perform a hypothesis test at the $\alpha=0.05$ level.
+
+**3a)** Define $\mu$ and write down the null and alternative hypotheses. *(2 points, interpretation)*
+
+***$\mu$ is the mean height of seven-year-old American children.***
+
+***The null hypothesis is: $H_0: \mu$ = 47.7 inches***
+
+***The alternative hypothesis is $H_A: \mu\neq$ 47.7 inches***
+
+
+<br>
+**3b)** If the mean height in our sample is 46.5 inches, calculate the necessary sample size for the test to achieve 80% power to detect the difference. You can assume that the standard deviation of height in the population of seven-year-olds is 3.2 inches. *(4 points, code/output and interpretation)*
+
+```{r}
+power.t.test(n=NULL, delta=(47.7-46.5), sd=3.2, power=0.8, sig.level=.05, type="one.sample", alternative="two.sided")
+```
+***With an effect size of 1.2 inches, a sample standard deviation of 3.2 inches, and a significance level of 0.05, the researchers will need a sample size of 58 to achieve a power of 0.8.***
+
+
+<br>
+**Exercise 4:** Peak expiratory flow (PEF) is a continuous measurement of pulmonary function. In people with asthma, the mean PEF is 523 L/min (SD=22 L/min). Researchers have developed a new drug that they think will change PEF by 8 L/min in asthmatics. They will administer their drug to a sample of subjects with asthma and wish to test whether the mean PEF after taking the drug is different from the mean PEF in the general population of asthmatics (523 L/min).  
+
+**4a)** Define $\mu$ and write down the null and alternative hypotheses. *(2 points, interpretation)*
+
+***$\mu$ is the mean peak expiratory flow in people with asthma treated with the new drug.***
+
+***The null hypothesis is: $H_0: \mu$ = 523 L/min***
+
+***The alternative hypothesis is $H_A: \mu\neq$ 523 L/min***
+
+
+<br>
+**4b)** How many subjects do they need to recruit for their test to have 90% power to identify efficacy of the drug at the $\alpha=0.05$ level? *(4 points, code/output and interpretation)*
+
+```{r}
+power.t.test(n=NULL, delta=8, sd=22, power=0.9, sig.level=.05, type="one.sample", alternative="two.sided")
+```
+
+***With an effect size of 8 L/min, a sample standard deviation of 22 L/min, and a significance level of 0.05, the researchers will need a sample size of 82 to achieve a power of 0.9.***
+
+<br>
+**Exercise 5:** Plasma glucose levels are used to determine the presence of diabetes. Suppose the mean plasma glucose concentration in 35- to 44-year-olds is 4.86 mg/dL with a standard deviation of 0.54 mg/dL. A study of 150 sedentary people in this age group is planned to test whether they have a higher or lower level of plasma glucose than the general population of 35- to 44-year-olds.
+
+**5a)** Define $\mu$ and write down the null and alternative hypotheses. *(2 points, interpretation)*
+
+***$\mu$ is the mean plasma glucose concentration in sedentary people between 35- and 44-years old.***
+
+***The null hypothesis is: $H_0: \mu$ = 4.86 mg/dL***
+
+***The alternative hypothesis is $H_A: \mu\neq$ 4.86 mg/dL***
+
+
+<br>
+**5b)** If the expected difference between the sedentary group and the general population is 0.10 mg/dL, then what is the power of the study with $\alpha=0.05$? *(4 points, code/output and interpretation)*
+
+```{r}
+power.t.test(n=150, delta=0.1, sd=0.54, power=NULL, sig.level=.05, type="one.sample", alternative="two.sided")
+```
+
+***Given a sample size of 150 people, an effect size of 0.1 mg/dL, a standard deviation of 0.54 mg/dL in the general population of 35 to 44 year olds, and a significance level of 0.05, this study will have a power of 0.6154092.***
+
+
+<br>
+**Exercise 6:** Iron-deficiency anemia is an important nutritional health problem in the United States. A dietary assessment was performed on 51 boys 9-11 years of age whose families were below the poverty level. The mean daily iron intake among these boys was found to be 12.50 mg (SD=4.75 mg). Suppose the mean daily iron intake among 9- to 11-year old boys from all income strata is 14.44mg. We want to test whether the mean iron intake among the low-income group is different from that in the general population. 
+
+**6a)** Define $\mu$ and write down the null and alternative hypotheses. *(2 points, interpretation)*
+
+***$\mu$ is the mean daily iron intake of 9 to 11 year old boys from a low income family (below the poverty level).***
+
+***The null hypothesis is: $H_0: \mu$ = 14.44 mg***
+
+***The alternative hypothesis is $H_A: \mu\neq$ 14.44 mg***
+
+
+<br>
+**6b)** What is the power of the study when $\alpha=0.01$? *(4 points, code/output and interpretation)*
+
+```{r}
+power.t.test(n=51, delta=(14.44-12.5), sd=4.75, power=NULL, sig.level=.01, type="one.sample", alternative="two.sided")
+```
+***Given a sample size of 51 boys (9-11 years of age) from a low income family, an effect size of 1.94 mg, a standard deviation of 4.75 mg in the general population of 9 to 11 year old boys, and a significance level of 0.01, this study will have a power of 0.5963844.***
+
+
+<br>
+**Exercise 7:** This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. To get started, import the lead.xlsx dataset.
+
+Researchers are worried that a smelter in Canada is exposing children in the local community to lead levels that could be potentially harmful to their neurological health. They are planning a study to assess whether the mean full-scale IQ score among children in this local community is significantly different from 100 points, which is the mean in the general population. 
+
+The researchers want to use our lead exposure dataset as pilot data (recall that this pilot data includes information on 124 *American* children living near a smelter). The researchers assume that the effects in their study will mimic those seen in the pilot data, and they want to calculate how many subjects they need to recruit in their study to have 80% power to demonstrate that the mean full-scale IQ score in the Canadian community is not equal to that in the general population (using $\alpha=0.05$).
+
+**7a)** Define $\mu$ and write down the null and alternative hypotheses. *(2 points, interpretation)*
+
+***$\mu$ is the mean full-scale IQ score of children living in the Canadian community located near a smelter.***
+
+***The null hypothesis is: $H_0: \mu$ = 100 points***
+
+***The alternative hypothesis is $H_A: \mu\neq$ 100 points***
+
+
+<br>
+**7b)** What sample size do the researchers need to recruit from the Canadian community to answer their question? *(4 points, code/output and interpretation)*
+
+```{r}
+# calculate mean & standard deviation using the lead dataset of American children
+library(readxl)
+lead <- read_excel('lead.xlsx', col_names=TRUE, na="")
+mean(lead$iqf, na.rm=TRUE)
+sd(lead$iqf, na.rm=TRUE)
+```
+
+```{r}
+# calculate sample size based on american children lead dataset & estimations
+power.t.test(n=NULL, delta=(100-91.08065), sd=14.40393, power=0.8, sig.level=.05, type="one.sample", alternative="two.sided")
+```
+
+***Using estimates from the lead dataset of American children living in a community located near a smelter, we assume an effect size of 8.91935 points, a sample standard deviation of 14.40393 points, and a significance level of 0.05, the researchers will need a sample size of 23 Canadian children to achieve a power of 0.8.***
+
+
+
+<br>
+
+## Part 2: Continuous data - 2 group estimation, testing, power, and sample size (Lecture 4.2)
+
+This exercise uses the lead.xlsx dataset. For more information about the study and data, read the lead data dictionary on the Canvas site. If you have not done so already, import the lead.xlsx dataset.
+
+<br>
+**Exercise 8:** Researchers are interested in investigating whether the average finger-wrist tapping rate is greater in the right hand than in the left hand among children in this community. 
+
+**8a)** How do you know that the data we have to answer this question are paired? *(2 points, interpretation)*
+
+***This is a paired dataset because the finger-wrist tapping rate is measured in each hand from the same individual.***
+
+
+<br>
+**8b)** Define $\Delta$ and write down the null and alternative hypotheses. *(2 points, interpretation)*
+
+***$\Delta$ is the mean difference between the finger-wrist tapping rate in the right hand ($\mu_1$) and the left hand ($\mu_2$) of all children living in this community located near a smelter.***
+
+***The null hypothesis is: $H_0: \Delta = 0$***
+
+***The alternative hypothesis is $H_A: \Delta > 0$***
+
+<br>
+**8c)** Calculate the mean and standard deviation of the finger-wrist tapping rate in each hand in this sample. What is our best numerical estimate of $\Delta$? *(4 points, code/output and interpretation)*
+
+```{r}
+# mean finger-wrist tapping rate in right hand
+mean(lead$fwt_r, na.rm=TRUE)
+
+# standard deviation of finger-wrist tapping rate in right hand
+sd(lead$fwt_r, na.rm=TRUE)
+
+# mean finger-wrist tapping rate in left hand
+mean(lead$fwt_l, na.rm=TRUE)
+
+# standard deviation of finger-wrist tapping rate in left hand
+sd(lead$fwt_l, na.rm=TRUE)
+
+# Estimation of delta mean difference between right minus left
+mean((lead$fwt_r - lead$fwt_l), na.rm=TRUE)
+
+
+```
+
+***The best estimation of $\Delta$ for the mean difference of finger-wrist tapping rates of the right hand and left hand in the population of all kids living in this community is given by the mean difference between finger-wrist tapping rates in the sample ($\bar{d}$) and is 7.414141.***
+
+
+<br>
+**8d)** Calculate the p-value for the paired t-test. Using a significance level of $\alpha=0.05$, do you reject or fail to reject the null hypothesis? Make a conclusion about the hypothesis test in the context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+t.test(lead$fwt_r, lead$fwt_l, alternative="greater", conf.level=.95, paired=TRUE)
+```
+
+***The p-value for the paired t-test to determine if the finger-wrist tapping rate is greater in the right hand versus the left hand in children living in this community located near a smelter is <0.0001, which is less than the significance level of 0.05 and we reject the null hypothesis. In other words, we have sufficient evidence that the mean finger-wrist tapping rate of children in this community is greater in the right hand than the left hand.***
+
+<br>
+**8e)** In our sample, the standard deviation of the difference in finger-wrist tapping rate (Right - Left) is 6.7 taps. What is the power we would have to detect a difference of 2 taps between the right and left hand? Assume $\alpha=0.05$ and a two-sided test. *(4 points, code/output and interpretation)*
+
+```{r}
+power.t.test(n=124, delta=2, sd=6.7, power=NULL, sig.level=.05, type="paired", alternative="two.sided")
+```
+
+***Given a sample size of 124 children and measuring finger-wrist tapping rates in the right and left hand of each child, an effect size of 2 taps, a standard deviation of 6.7 taps, and a significance level of 0.05, the study would have a power of 0.9095535. In other words, there is about a 90% probability of finding evidence to suggest that the finger-wrist tapping rate is different in the right hand versus the left hand.***
+
+<br>
+**Exercise 9:** Researchers are interested in investigating whether the mean finger-wrist tapping rate in the dominant hand differs between male and female children in this community.
+
+**9a)** How do you know that the data we have to answer this question are from independent groups? *(2 points, interpretation)*
+
+***This study will compare the finger-wrist tapping rate in the dominant hand for two independent groups - male and female children. Neither group is related to each other in any way that will affect the finger-wrist tapping rate, so they are independent.***
+
+
+<br>
+**9b)** Define $\mu_1$ and $\mu_2$ and write down the null and alternative hypotheses. *(2 points, interpretation)*
+
+***$\mu_1$ is the finger-wrist tapping rate in the dominant hand of men.***
+
+***$\mu_2$ is the finger-wrist tapping rate in the dominant hand of women***
+
+***The null hypothesis is $H_0: \mu_1 = \mu_2$***
+
+***The alternative hypothesis is $H_A: \mu_1 \neq \mu_2$***
+
+
+<br>
+**9c)** Calculate the p-value for the two-group t-test. Assume unequal variances when performing the test. Using a significance level of $\alpha=0.05$, do you reject or fail to reject $H_0$ for the two-group t-test? Make a conclusion about the t-test in the context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+t.test(lead$maxfwt ~ lead$sex, data=lead, alternative="two.sided", conf.level=.95, var.equal=FALSE)
+```
+
+***The p-value for this two-group t-test of finger-wrist tapping rates in the dominant hand of male versus female children in this community is 0.4428, which is not less than our signficance level of 0.05 and we fail to reject the null hypothesis. In other words, we have no evidence that the finger-wrist tapping rates in the dominant hand of male children is significantly different from female children in this community.***
+
+<br>
+**Exercise 10:** Researchers are interested in investigating whether the mean full-scale IQ score is different in children who lived near the smelter in their first two years life vs. children who moved near the smelter at a later age.
+
+**10a)** Define $\mu_1$ and $\mu_2$ and write down the null and alternative hypotheses. *(2 points, interpretation)*
+
+***$\mu_1$ is the mean full-scale IQ score of children in the community living near the smelter during their first two years of life.***
+
+***$\mu_2$ is the mean full-scale IQ score of children who moved to the community after the age of two.***
+
+***The null hypothesis is: $H_0: \mu_1 = \mu_2$***
+
+***The alternative hypothesis is: $H_A: \mu_1 \neq \mu_2$***
+
+
+
+<br>
+**10b)** Calculate the p-value for the two-group t-test. Assume equal variances when performing the test. Using a significance level of $\alpha=0.05$, do you reject or fail to reject $H_0$ for the two-group t-test? Make a conclusion about the t-test in the context of the problem. *(4 points, code/output and interpretation)*
+
+```{r}
+t.test(lead$iqf ~ lead$fst2yrs, data=lead, alternative="two.sided", conf.level=.95, var.equal=TRUE)
+```
+
+***The p-value for the two-group t-test for the mean full-scale IQ scores of children living near the smelter during their first two years of life versus those children who moved near the smelter after the age of two is p=0.6576. Therefore we fail to reject the null hypothesis that the mean full-scale IQ scores of children living near the smelter during their first two years of life is the same as the mean full-scale IQ score of children who moved near the smelter after the age of two. There is not sufficient evidence to suggest the mean full-scale IQ score is different between children who lived near the smelter in their first two years of life and those children who moved near the smelter after the age of two.***
+
+
+<br>
+**10c)** Researchers are worried that their test in part (b) may have been underpowered to detect a difference in full-scale IQ score between children who did and did not live near the smelter in their first two years of life. They want to use this study as pilot data to estimate what the effect size and variability is, and they will use that information to plan a new study to answer this question. How many subjects do they need to recruit to have 80% power to detect a difference between full-scale IQ score in children who did and did not live near the smelter in their first two years of life? Assume that they will perform the test using an $\alpha=0.05$ significance level. *(4 points, code/output and interpretation)*
+
+```{r}
+# standard deviation of mean iqf in children who lived there before age of 2
+tapply(lead$iqf, lead$fst2yrs, sd, na.rm=TRUE)
+```
+```{r}
+# sample size calculation using largest standard deviation of two groups
+power.t.test(n=NULL, delta=(92.0000-90.7191), sd=15.90967, power=0.8, sig.level=.05, type="two.sample", alternative="two.sided")
+```
+ ***Using the lead dataset of 124 children living in this community located near the smelter, we can estimate an effect size of 1.2809 full-scale IQ points and a maximum standard deviation of 15.90967 points. Using those estimates with a desired signficance level of 0.05 and test power of 0.8, the new study would need a sample size of 2423 participants in each group (4846 total participants).***
+ 
+
+<br>
+**10d)** Why is the necessary sample size in part (c) so large? What should the researchers do to develop a study design that is feasible? *(2 points, interpretation)*
+
+***The sample size required for a test power of 80% is high because the estimated effect size is so low and the estimated standard deviation is so high. The researchers have no reason to change the estimated variability and effect size, so they could only reduce the desired power and significance level in order to lower the required sample size. Alternatively, the researchers would need to change the categorical variable (lowering the threshold from 2 years in order to get a larger effect size and/or smaller variance), or completely abandon the study altogether.***
+
+<br>
